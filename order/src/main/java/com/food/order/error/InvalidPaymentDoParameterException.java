@@ -6,8 +6,8 @@ public class InvalidPaymentDoParameterException extends RuntimeException {
     public InvalidPaymentDoParameterException() {
     }
 
-    public InvalidPaymentDoParameterException(String message) {
-        super(ERROR.appendMessage(message));
+    public InvalidPaymentDoParameterException(String extraMessage) {
+        super(ERROR.appendMessage(extraMessage));
     }
 
     public String getErrorCode() {

@@ -45,6 +45,10 @@ public class PaymentDoRequest {
         return methods.size() != items.size();
     }
 
+    public Long getOrderId() {
+        return orderId;
+    }
+
     public static class Item {
         private final PaymentMethod method;
         private final Integer amount;
