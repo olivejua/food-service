@@ -49,6 +49,14 @@ public class PaymentDoRequest {
         return orderId;
     }
 
+    public boolean hasSameTotalAmountAs(Integer amount) {
+        int totalPaymentAmount = items.stream()
+                .mapToInt(item -> item.amount)
+                .sum();
+
+        return totalPaymentAmount == amount;
+    }
+
     public static class Item {
         private final PaymentMethod method;
         private final Integer amount;
