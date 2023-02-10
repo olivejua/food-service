@@ -55,8 +55,9 @@ public class Order extends BaseTimeEntity {
     @Length(max = 150, message = COMMENT_HAS_TO_BE_BETWEEN_LENGTH)
     private String comment;
 
-    public static Order create(User customer, Store store, Integer amount, OrderStatus status, String comment) {
+    public static Order create(Long id, User customer, Store store, Integer amount, OrderStatus status, String comment) {
         Order order = new Order();
+        order.id = id;
         order.customer = customer;
         order.store = store;
         order.amount = amount;
@@ -64,6 +65,10 @@ public class Order extends BaseTimeEntity {
         order.comment = comment;
 
         return order;
+    }
+
+    public static Order create(User customer, Store store, Integer amount, OrderStatus status, String comment) {
+        return Order.create(null, customer, store, amount, status, comment);
     }
 
     public Long getCustomerId() {
