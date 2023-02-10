@@ -32,12 +32,17 @@ public class PaymentDoRequest {
             throw new InvalidPaymentDoParameterException("결제정보가 비어있습니다.");
         }
 
+        if (isItemsWithDuplicatedMethods()) {
+            throw new InvalidPaymentDoParameterException("중복된 결제수단은 존재할 수 없습니다.");
+        }
+    }
+
+    private boolean isItemsWithDuplicatedMethods() {
         Set<PaymentMethod> methods = items.stream()
                 .map(item -> item.method)
                 .collect(Collectors.toSet());
-        if (methods.size() != items.size()) {
-            throw new InvalidPaymentDoParameterException("중복된 결제수단은 존재할 수 없습니다.");
-        }
+
+        return methods.size() != items.size();
     }
 
     public static class Item {
