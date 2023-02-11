@@ -13,6 +13,12 @@ public class MockOrder {
         return new Builder();
     }
 
+    public static Order with(Long id) {
+        return builder()
+                .id(id)
+                .build();
+    }
+
     @NoArgsConstructor(access = PRIVATE)
     public static class Builder {
         private Long id;

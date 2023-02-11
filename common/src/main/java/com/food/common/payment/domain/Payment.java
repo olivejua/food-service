@@ -38,12 +38,17 @@ public class Payment extends BaseTimeEntity {
     @Enumerated(STRING)
     private PaymentActionType actionType;
 
-    public static Payment create(Order order, PaymentActionType actionType) {
+    public static Payment create(Long id, Order order, PaymentActionType actionType) {
         Payment payment = new Payment();
+        payment.id = id;
         payment.order = order;
         payment.actionType = actionType;
 
         return payment;
+    }
+
+    public static Payment create(Order order, PaymentActionType actionType) {
+        return create(null, order, actionType);
     }
 
     public void update(PaymentActionType actionType) {

@@ -1,7 +1,7 @@
 package com.food.order.temp;
 
-import com.food.common.order.domain.Order;
-import com.food.common.order.repository.OrderRepository;
+import com.food.common.payment.domain.Payment;
+import com.food.common.payment.repository.PaymentRepository;
 import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,27 +14,27 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class MemoryOrderRepository implements OrderRepository {
-    private final Map<Long, Order> data = new HashMap<>();
-
+public class MemoryPaymentRepository implements PaymentRepository {
+    private final Map<Long, Payment> data = new HashMap<>();
+    private long autoIncrementKey = 0;
 
     @Override
-    public List<Order> findAll() {
+    public List<Payment> findAll() {
         return null;
     }
 
     @Override
-    public List<Order> findAll(Sort sort) {
+    public List<Payment> findAll(Sort sort) {
         return null;
     }
 
     @Override
-    public Page<Order> findAll(Pageable pageable) {
+    public Page<Payment> findAll(Pageable pageable) {
         return null;
     }
 
     @Override
-    public List<Order> findAllById(Iterable<Long> longs) {
+    public List<Payment> findAllById(Iterable<Long> longs) {
         return null;
     }
 
@@ -49,7 +49,7 @@ public class MemoryOrderRepository implements OrderRepository {
     }
 
     @Override
-    public void delete(Order entity) {
+    public void delete(Payment entity) {
 
     }
 
@@ -59,7 +59,7 @@ public class MemoryOrderRepository implements OrderRepository {
     }
 
     @Override
-    public void deleteAll(Iterable<? extends Order> entities) {
+    public void deleteAll(Iterable<? extends Payment> entities) {
 
     }
 
@@ -69,19 +69,27 @@ public class MemoryOrderRepository implements OrderRepository {
     }
 
     @Override
-    public <S extends Order> S save(S entity) {
+    public <S extends Payment> S save(S entity) {
+        if (entity.getId() == null) {
+            autoIncrementKey++;
+            Payment newOne = Payment.create(autoIncrementKey, entity.getOrder(), entity.getActionType());
+            data.put(autoIncrementKey, newOne);
+
+            return (S) newOne;
+        }
+
         data.put(entity.getId(), entity);
 
         return entity;
     }
 
     @Override
-    public <S extends Order> List<S> saveAll(Iterable<S> entities) {
+    public <S extends Payment> List<S> saveAll(Iterable<S> entities) {
         return null;
     }
 
     @Override
-    public Optional<Order> findById(Long id) {
+    public Optional<Payment> findById(Long id) {
         return Optional.ofNullable(data.get(id));
     }
 
@@ -96,17 +104,17 @@ public class MemoryOrderRepository implements OrderRepository {
     }
 
     @Override
-    public <S extends Order> S saveAndFlush(S entity) {
+    public <S extends Payment> S saveAndFlush(S entity) {
         return null;
     }
 
     @Override
-    public <S extends Order> List<S> saveAllAndFlush(Iterable<S> entities) {
+    public <S extends Payment> List<S> saveAllAndFlush(Iterable<S> entities) {
         return null;
     }
 
     @Override
-    public void deleteAllInBatch(Iterable<Order> entities) {
+    public void deleteAllInBatch(Iterable<Payment> entities) {
 
     }
 
@@ -121,52 +129,52 @@ public class MemoryOrderRepository implements OrderRepository {
     }
 
     @Override
-    public Order getOne(Long aLong) {
+    public Payment getOne(Long aLong) {
         return null;
     }
 
     @Override
-    public Order getById(Long aLong) {
+    public Payment getById(Long aLong) {
         return null;
     }
 
     @Override
-    public Order getReferenceById(Long aLong) {
+    public Payment getReferenceById(Long aLong) {
         return null;
     }
 
     @Override
-    public <S extends Order> Optional<S> findOne(Example<S> example) {
+    public <S extends Payment> Optional<S> findOne(Example<S> example) {
         return Optional.empty();
     }
 
     @Override
-    public <S extends Order> List<S> findAll(Example<S> example) {
+    public <S extends Payment> List<S> findAll(Example<S> example) {
         return null;
     }
 
     @Override
-    public <S extends Order> List<S> findAll(Example<S> example, Sort sort) {
+    public <S extends Payment> List<S> findAll(Example<S> example, Sort sort) {
         return null;
     }
 
     @Override
-    public <S extends Order> Page<S> findAll(Example<S> example, Pageable pageable) {
+    public <S extends Payment> Page<S> findAll(Example<S> example, Pageable pageable) {
         return null;
     }
 
     @Override
-    public <S extends Order> long count(Example<S> example) {
+    public <S extends Payment> long count(Example<S> example) {
         return 0;
     }
 
     @Override
-    public <S extends Order> boolean exists(Example<S> example) {
+    public <S extends Payment> boolean exists(Example<S> example) {
         return false;
     }
 
     @Override
-    public <S extends Order, R> R findBy(Example<S> example, Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
+    public <S extends Payment, R> R findBy(Example<S> example, Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
         return null;
     }
 }

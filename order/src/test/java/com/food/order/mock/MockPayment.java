@@ -34,7 +34,7 @@ public class MockPayment {
         }
 
         public Payment build() {
-            return Payment.create(order, actionType);
+            return Payment.create(id, order, actionType);
         }
     }
 }
