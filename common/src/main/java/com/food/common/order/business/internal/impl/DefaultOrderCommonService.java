@@ -24,4 +24,14 @@ public class DefaultOrderCommonService implements OrderCommonService {
 
         return Optional.of(new OrderDto(optionalOrder.get()));
     }
+
+    @Override
+    public boolean existsById(Long id) {
+        return orderRepository.existsById(id);
+    }
+
+    @Override
+    public OrderDto save(OrderDto order) {
+        return null;
+    }
 }

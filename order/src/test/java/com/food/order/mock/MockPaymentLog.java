@@ -1,4 +1,4 @@
-package com.food.order.temp;
+package com.food.order.mock;
 
 import com.food.common.payment.domain.Payment;
 import com.food.common.payment.domain.PaymentLog;

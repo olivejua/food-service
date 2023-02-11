@@ -1,4 +1,4 @@
-package com.food.order.temp;
+package com.food.order.error;
 
 import com.food.order.error.PaymentErrors;
 

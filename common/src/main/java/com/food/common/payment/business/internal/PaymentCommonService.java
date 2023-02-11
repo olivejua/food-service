@@ -8,4 +8,6 @@ public interface PaymentCommonService {
     Long save(@NotNull Long orderId, @NotNull PaymentActionType actionType);
 
     void updateActionType(@NotNull Long paymentId, @NotNull PaymentActionType actionType);
+
+    boolean existsById(@NotNull Long id);
 }

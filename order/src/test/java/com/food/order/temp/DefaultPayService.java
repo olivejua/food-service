@@ -1,44 +1,47 @@
 package com.food.order.temp;
 
-import com.food.common.order.domain.Order;
-import com.food.common.order.repository.OrderRepository;
-import com.food.common.payment.domain.Payment;
-import com.food.common.payment.domain.PaymentLog;
+import com.food.common.order.business.internal.OrderCommonService;
+import com.food.common.order.business.internal.dto.OrderDto;
+import com.food.common.payment.business.external.model.payrequest.PaymentElement;
+import com.food.common.payment.business.internal.PaymentCommonService;
+import com.food.common.payment.business.internal.PaymentLogCommonService;
 import com.food.common.payment.enumeration.PaymentActionType;
-import com.food.common.payment.repository.PaymentLogRepository;
-import com.food.common.payment.repository.PaymentRepository;
+import com.food.order.error.DuplicatedPaymentException;
+import com.food.order.error.InvalidPaymentException;
+import com.food.order.error.NotFoundOrderException;
 import com.food.order.error.PaymentErrors;
 import com.food.order.presentation.dto.request.PaymentDoRequest;
 import lombok.RequiredArgsConstructor;
 
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 public class DefaultPayService implements PayService {
-    private final OrderRepository orderRepository;
-    private final PaymentRepository paymentRepository;
-    private final PaymentLogRepository paymentLogRepository;
+    private final OrderCommonService orderCommonService;
+    private final PaymentCommonService paymentCommonService;
+    private final PaymentLogCommonService paymentLogRepository;
 
     @Override
     public Long pay(PaymentDoRequest request) {
-        Order order = orderRepository.findById(request.getOrderId())
+        OrderDto order = orderCommonService.findById(request.getOrderId())
                 .orElseThrow(() -> new NotFoundOrderException(request.getOrderId()));
 
         if (!request.hasSameTotalAmountAs(order.getAmount())) {
             throw new InvalidPaymentException(PaymentErrors.WRONG_PAYMENT_AMOUNT);
         }
 
-        if (paymentRepository.existsById(order.getId())) {
+        if (paymentCommonService.existsById(order.getId())) {
             throw new DuplicatedPaymentException();
         }
 
-        Payment payment = paymentRepository.save(Payment.create(order, PaymentActionType.PAYMENT));
+        Long paymentId = paymentCommonService.save(order.getId(), PaymentActionType.PAYMENT);
 
-        List<PaymentLog> paymentLogs = request.getItems().stream()
-                .map(item -> PaymentLog.create(payment, item.getMethod(), item.getAmount()))
-                .toList();
-        paymentLogRepository.saveAll(paymentLogs);
+        Set<PaymentElement> paymentElements = request.getItems().stream()
+                .map(item -> PaymentElement.findPaymentElement(item.getMethod(), item.getAmount()))
+                .collect(Collectors.toSet());
+        paymentLogRepository.saveAll(paymentId, paymentElements);
 
-        return payment.getId();
+        return paymentId;
     }
 }

@@ -1,15 +1,22 @@
 package com.food.order;
 
+import com.food.common.order.business.internal.OrderCommonService;
+import com.food.common.order.business.internal.dto.OrderDto;
 import com.food.common.order.domain.Order;
-import com.food.common.order.repository.OrderRepository;
+import com.food.common.payment.business.internal.PaymentCommonService;
+import com.food.common.payment.business.internal.PaymentLogCommonService;
 import com.food.common.payment.domain.Payment;
 import com.food.common.payment.domain.PaymentLog;
 import com.food.common.payment.enumeration.PaymentMethod;
-import com.food.common.payment.repository.PaymentLogRepository;
-import com.food.common.payment.repository.PaymentRepository;
+import com.food.order.error.DuplicatedPaymentException;
+import com.food.order.error.InvalidPaymentException;
+import com.food.order.error.NotFoundOrderException;
 import com.food.order.mock.MockOrder;
 import com.food.order.mock.MockPayment;
 import com.food.order.presentation.dto.request.PaymentDoRequest;
+import com.food.order.stubrepository.StubOrderService;
+import com.food.order.stubrepository.MemoryPaymentLogRepository;
+import com.food.order.stubrepository.MemoryPaymentRepository;
 import com.food.order.temp.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -37,17 +44,17 @@ public class PaymentDoTest {
      */
 
     private PayService payService;
-    private OrderRepository orderRepository;
-    private PaymentRepository paymentRepository;
-    private PaymentLogRepository paymentLogRepository;
+    private StubOrderService stubOrderService;
+    private PaymentCommonService paymentCommonService;
+    private PaymentLogCommonService paymentLogCommonService;
 
     @BeforeEach
     void setup() {
-        orderRepository = new MemoryOrderRepository();
-        paymentRepository = new MemoryPaymentRepository();
-        paymentLogRepository = new MemoryPaymentLogRepository();
+        stubOrderService = new StubOrderService();
+        paymentCommonService = new MemoryPaymentRepository();
+        paymentLogCommonService = new MemoryPaymentLogRepository();
 
-        payService = new DefaultPayService(orderRepository, paymentRepository, paymentLogRepository);
+        payService = new DefaultPayService(stubOrderService, paymentCommonService, paymentLogCommonService);
     }
 
     @Test
@@ -64,7 +71,7 @@ public class PaymentDoTest {
 
     private Long givenOrderIdNotPresent() {
         Long result = 1L;
-        if (orderRepository.existsById(result)) {
+        if (stubOrderService.existsById(result)) {
             throw new IllegalArgumentException();
         }
 
@@ -74,11 +81,8 @@ public class PaymentDoTest {
     @Test
     void 주문서의_금액과_결제금액이_일치하지_않으면_실패한다() {
         //given
-        Order mockOrder = MockOrder.builder()
-                .id(1L)
-                .amount(30_000)
-                .build();
-        orderRepository.save(mockOrder);
+        OrderDto mockOrder = MockOrder.with(1L, 30_000);
+        stubOrderService.remember(mockOrder);
 
         PaymentDoRequest.Item requestItem = new PaymentDoRequest.Item(PaymentMethod.CARD, 40_000);
         PaymentDoRequest request = new PaymentDoRequest(mockOrder.getId(), requestItem);
@@ -96,12 +100,12 @@ public class PaymentDoTest {
     @Test
     void 중복_결제데이터가_존재하면_실패한다() {
         //given
-        Order mockOrder = orderRepository.save(MockOrder.with(1L));
+        Order mockOrder = stubOrderService.save(MockOrder.with(1L));
         Payment payment = MockPayment.builder()
                 .id(1L)
                 .order(mockOrder)
                 .build();
-        paymentRepository.save(payment);
+        paymentCommonService.save(payment);
 
         PaymentDoRequest.Item requestItem = new PaymentDoRequest.Item(PaymentMethod.CARD, mockOrder.getAmount());
         PaymentDoRequest request = new PaymentDoRequest(mockOrder.getId(), requestItem);
@@ -115,20 +119,20 @@ public class PaymentDoTest {
 
     @Test
     void 결제데이터와_디테일로그데이터를_저장한다() {
-        Order mockOrder = orderRepository.save(MockOrder.with(1L));
+        Order mockOrder = stubOrderService.save(MockOrder.with(1L));
         PaymentDoRequest.Item requestItem1 = new PaymentDoRequest.Item(PaymentMethod.CARD, 10_000);
         PaymentDoRequest.Item requestItem2 = new PaymentDoRequest.Item(PaymentMethod.ACCOUNT_TRANSFER, mockOrder.getAmount() - 10_000);
         PaymentDoRequest request = new PaymentDoRequest(mockOrder.getId(), requestItem1, requestItem2);
 
         Long savedPaymentId = payService.pay(request);
 
-        Optional<Payment> findPayment = paymentRepository.findById(savedPaymentId);
+        Optional<Payment> findPayment = paymentCommonService.findById(savedPaymentId);
         assertTrue(findPayment.isPresent());
         Payment payment = findPayment.get();
 
         assertEquals(mockOrder.getId(), payment.getOrder().getId());
 
-        List<PaymentLog> paymentLogs = paymentLogRepository.findAllByPaymentId(savedPaymentId);
+        List<PaymentLog> paymentLogs = paymentLogCommonService.findAllByPaymentId(savedPaymentId);
 
         assertEquals(request.totalPaymentAmount(), getTotalAmountOfPaymentLogs(paymentLogs));
     }

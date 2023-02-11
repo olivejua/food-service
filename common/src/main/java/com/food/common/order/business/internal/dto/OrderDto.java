@@ -1,7 +1,8 @@
 package com.food.common.order.business.internal.dto;
 
-import com.food.common.order.enumeration.OrderStatus;
 import com.food.common.order.domain.Order;
+import com.food.common.order.enumeration.OrderStatus;
+import lombok.Builder;
 import lombok.Getter;
 
 import javax.validation.constraints.NotNull;
@@ -22,5 +23,15 @@ public final class OrderDto {
         this.amount = order.getAmount();
         this.status = order.getStatus();
         this.comment = order.getComment();
+    }
+
+    @Builder
+    public OrderDto(Long id, Long customerId, Long storeId, Integer amount, OrderStatus status, String comment) {
+        this.id = id;
+        this.customerId = customerId;
+        this.storeId = storeId;
+        this.amount = amount;
+        this.status = status;
+        this.comment = comment;
     }
 }

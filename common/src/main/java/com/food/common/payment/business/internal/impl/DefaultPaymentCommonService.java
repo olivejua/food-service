@@ -32,4 +32,9 @@ public class DefaultPaymentCommonService implements PaymentCommonService {
 
         payment.update(actionType);
     }
+
+    @Override
+    public boolean existsById(Long id) {
+        return paymentRepository.existsById(id);
+    }
 }
