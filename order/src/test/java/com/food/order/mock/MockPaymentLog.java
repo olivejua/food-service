@@ -1,11 +1,9 @@
 package com.food.order.mock;
 
-import com.food.common.payment.domain.Payment;
-import com.food.common.payment.domain.PaymentLog;
+import com.food.common.payment.business.internal.model.PaymentLogDto;
 import com.food.common.payment.enumeration.PaymentActionType;
 import com.food.common.payment.enumeration.PaymentMethod;
 import com.food.common.user.domain.Point;
-import com.food.order.mock.MockPayment;
 
 public class MockPaymentLog {
     public static Builder builder() {
@@ -14,7 +12,7 @@ public class MockPaymentLog {
 
     public static class Builder {
         private Long id;
-        private Payment payment = MockPayment.builder().build();
+        private Long paymentId = 1L;
         private PaymentMethod method = PaymentMethod.CARD;
         private PaymentActionType type = PaymentActionType.PAYMENT;
         private Integer amount = 24000;
@@ -25,8 +23,8 @@ public class MockPaymentLog {
             return this;
         }
 
-        public Builder payment(Payment payment) {
-            this.payment = payment;
+        public Builder paymentId(Long id) {
+            this.paymentId = id;
             return this;
         }
 
@@ -50,8 +48,12 @@ public class MockPaymentLog {
             return this;
         }
 
-        public PaymentLog build() {
-            return PaymentLog.create(payment, method, amount, point);
+        public PaymentLogDto build() {
+            return PaymentLogDto.builder()
+                    .paymentId(paymentId)
+                    .method(method)
+                    .amount(amount)
+                    .build();
         }
     }
 }
