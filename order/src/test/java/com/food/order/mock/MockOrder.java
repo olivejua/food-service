@@ -1,7 +1,6 @@
 package com.food.order.mock;
 
 import com.food.common.order.business.internal.dto.OrderDto;
-import com.food.common.order.domain.Order;
 import com.food.common.order.enumeration.OrderStatus;
 import com.food.common.store.domain.Store;
 import com.food.common.user.domain.User;
@@ -14,7 +13,7 @@ public class MockOrder {
         return new Builder();
     }
 
-    public static Order with(Long id) {
+    public static OrderDto with(Long id) {
         return builder()
                 .id(id)
                 .build();
@@ -66,8 +65,15 @@ public class MockOrder {
             return this;
         }
 
-        public Order build() {
-            return Order.create(id, customer, store, amount, status, comment);
+        public OrderDto build() {
+            return OrderDto.builder()
+                    .id(id)
+                    .customerId(customer != null ? customer.getId() : null)
+                    .storeId(store != null ? store.getId() : null)
+                    .amount(amount)
+                    .status(status)
+                    .comment(comment)
+                    .build();
         }
     }
 }

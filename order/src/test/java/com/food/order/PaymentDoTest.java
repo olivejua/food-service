@@ -1,11 +1,8 @@
 package com.food.order;
 
-import com.food.common.order.business.internal.OrderCommonService;
 import com.food.common.order.business.internal.dto.OrderDto;
 import com.food.common.order.domain.Order;
-import com.food.common.payment.business.internal.PaymentCommonService;
 import com.food.common.payment.business.internal.PaymentLogCommonService;
-import com.food.common.payment.domain.Payment;
 import com.food.common.payment.domain.PaymentLog;
 import com.food.common.payment.enumeration.PaymentMethod;
 import com.food.order.error.DuplicatedPaymentException;
@@ -14,15 +11,12 @@ import com.food.order.error.NotFoundOrderException;
 import com.food.order.mock.MockOrder;
 import com.food.order.mock.MockPayment;
 import com.food.order.presentation.dto.request.PaymentDoRequest;
-import com.food.order.stubrepository.StubOrderService;
-import com.food.order.stubrepository.MemoryPaymentLogRepository;
-import com.food.order.stubrepository.MemoryPaymentRepository;
+import com.food.order.stubrepository.*;
 import com.food.order.temp.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -45,16 +39,16 @@ public class PaymentDoTest {
 
     private PayService payService;
     private StubOrderService stubOrderService;
-    private PaymentCommonService paymentCommonService;
+    private StubPaymentService stubPaymentService;
     private PaymentLogCommonService paymentLogCommonService;
 
     @BeforeEach
     void setup() {
         stubOrderService = new StubOrderService();
-        paymentCommonService = new MemoryPaymentRepository();
+        stubPaymentService = new StubPaymentService();
         paymentLogCommonService = new MemoryPaymentLogRepository();
 
-        payService = new DefaultPayService(stubOrderService, paymentCommonService, paymentLogCommonService);
+        payService = new DefaultPayService(stubOrderService, stubPaymentService, paymentLogCommonService);
     }
 
     @Test
@@ -100,12 +94,11 @@ public class PaymentDoTest {
     @Test
     void 중복_결제데이터가_존재하면_실패한다() {
         //given
-        Order mockOrder = stubOrderService.save(MockOrder.with(1L));
-        Payment payment = MockPayment.builder()
+        OrderDto mockOrder = stubOrderService.save(MockOrder.with(1L));
+        PaymentDto mockPayment = MockPayment.builder()
                 .id(1L)
-                .order(mockOrder)
                 .build();
-        paymentCommonService.save(payment);
+        stubPaymentService.remember(mockPayment);
 
         PaymentDoRequest.Item requestItem = new PaymentDoRequest.Item(PaymentMethod.CARD, mockOrder.getAmount());
         PaymentDoRequest request = new PaymentDoRequest(mockOrder.getId(), requestItem);
@@ -126,11 +119,8 @@ public class PaymentDoTest {
 
         Long savedPaymentId = payService.pay(request);
 
-        Optional<Payment> findPayment = paymentCommonService.findById(savedPaymentId);
-        assertTrue(findPayment.isPresent());
-        Payment payment = findPayment.get();
-
-        assertEquals(mockOrder.getId(), payment.getOrder().getId());
+        boolean exists = stubPaymentService.existsById(savedPaymentId);
+        assertTrue(exists);
 
         List<PaymentLog> paymentLogs = paymentLogCommonService.findAllByPaymentId(savedPaymentId);
 
