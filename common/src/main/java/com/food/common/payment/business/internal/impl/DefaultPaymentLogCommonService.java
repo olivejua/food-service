@@ -3,6 +3,7 @@ package com.food.common.payment.business.internal.impl;
 import com.food.common.payment.business.external.model.payrequest.PaymentElement;
 import com.food.common.payment.business.external.model.payrequest.PointPayment;
 import com.food.common.payment.business.internal.PaymentLogCommonService;
+import com.food.common.payment.business.internal.model.PaymentLogDto;
 import com.food.common.payment.domain.Payment;
 import com.food.common.payment.domain.PaymentLog;
 import com.food.common.payment.repository.PaymentLogRepository;
@@ -47,8 +48,10 @@ public class DefaultPaymentLogCommonService implements PaymentLogCommonService {
     }
 
     @Override
-    public List<PaymentLog> findAllByPaymentId(Long paymentId) {
+    public List<PaymentLogDto> findAllByPaymentId(Long paymentId) {
         Payment payment = paymentEntityService.findById(paymentId);
-        return paymentLogRepository.findAllByPayment(payment);
+        return paymentLogRepository.findAllByPayment(payment).stream()
+                .map(PaymentLogDto::new)
+                .collect(Collectors.toList());
     }
 }

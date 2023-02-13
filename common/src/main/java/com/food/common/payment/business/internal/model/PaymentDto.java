@@ -1,5 +1,6 @@
-package com.food.order.stubrepository;
+package com.food.common.payment.business.internal.model;
 
+import com.food.common.payment.domain.Payment;
 import com.food.common.payment.enumeration.PaymentActionType;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,5 +16,11 @@ public final class PaymentDto {
         this.id = id;
         this.orderId = orderId;
         this.actionType = actionType;
+    }
+
+    public PaymentDto(Payment payment) {
+        id = payment.getId();
+        orderId = payment.getOrder().getId();
+        actionType = payment.getActionType();
     }
 }

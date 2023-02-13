@@ -5,6 +5,7 @@ import com.food.common.order.business.internal.dto.OrderDto;
 import com.food.common.payment.business.external.model.payrequest.PaymentElement;
 import com.food.common.payment.business.internal.PaymentCommonService;
 import com.food.common.payment.business.internal.PaymentLogCommonService;
+import com.food.common.payment.business.internal.model.PaymentDto;
 import com.food.common.payment.enumeration.PaymentActionType;
 import com.food.order.error.DuplicatedPaymentException;
 import com.food.order.error.InvalidPaymentException;
@@ -35,7 +36,11 @@ public class DefaultPayService implements PayService {
             throw new DuplicatedPaymentException();
         }
 
-        Long paymentId = paymentCommonService.save(order.getId(), PaymentActionType.PAYMENT);
+        PaymentDto paymentDto = PaymentDto.builder()
+                .orderId(order.getId())
+                .actionType(PaymentActionType.PAYMENT)
+                .build();
+        Long paymentId = paymentCommonService.save(paymentDto).getId();
 
         Set<PaymentElement> paymentElements = request.getItems().stream()
                 .map(item -> PaymentElement.findPaymentElement(item.getMethod(), item.getAmount()))

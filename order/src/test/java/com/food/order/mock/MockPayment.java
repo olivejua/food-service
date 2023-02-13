@@ -1,8 +1,8 @@
 package com.food.order.mock;
 
-import com.food.common.order.domain.Order;
+import com.food.common.order.business.internal.dto.OrderDto;
 import com.food.common.payment.enumeration.PaymentActionType;
-import com.food.order.stubrepository.PaymentDto;
+import com.food.common.payment.business.internal.model.PaymentDto;
 import lombok.NoArgsConstructor;
 
 import static lombok.AccessLevel.PRIVATE;
@@ -12,10 +12,16 @@ public class MockPayment {
         return new Builder();
     }
 
+    public static PaymentDto create(OrderDto order) {
+        return builder()
+                .order(order)
+                .build();
+    }
+
     @NoArgsConstructor(access = PRIVATE)
     public static class Builder {
         private Long id;
-        private Order order;
+        private OrderDto order;
         private PaymentActionType actionType = PaymentActionType.PAYMENT;
 
         public Builder id(Long id) {
@@ -23,7 +29,7 @@ public class MockPayment {
             return this;
         }
 
-        public Builder order(Order order) {
+        public Builder order(OrderDto order) {
             this.order = order;
             return this;
         }

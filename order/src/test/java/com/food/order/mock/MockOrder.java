@@ -13,16 +13,14 @@ public class MockOrder {
         return new Builder();
     }
 
-    public static OrderDto with(Long id) {
+    public static OrderDto create(int amount) {
         return builder()
-                .id(id)
+                .amount(amount)
                 .build();
     }
 
-    public static OrderDto with(Long id, Integer amount) {
-        return OrderDto.builder()
-                .id(id)
-                .amount(amount)
+    public static OrderDto create() {
+        return builder()
                 .build();
     }
 
