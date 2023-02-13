@@ -1,15 +1,15 @@
 package com.food.order;
 
 import com.food.common.order.business.internal.dto.OrderDto;
-import com.food.common.payment.domain.PaymentLog;
+import com.food.common.payment.business.internal.model.PaymentLogDto;
 import com.food.common.payment.enumeration.PaymentMethod;
 import com.food.order.error.DuplicatedPaymentException;
 import com.food.order.error.InvalidPaymentException;
 import com.food.order.error.NotFoundOrderException;
+import com.food.order.error.PaymentErrors;
 import com.food.order.mock.MockOrder;
 import com.food.order.mock.MockPayment;
 import com.food.order.presentation.dto.request.PaymentDoRequest;
-import com.food.order.stubrepository.PaymentDto;
 import com.food.order.stubrepository.StubOrderService;
 import com.food.order.stubrepository.StubPaymentLogService;
 import com.food.order.stubrepository.StubPaymentService;
@@ -20,6 +20,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static com.food.common.utils.CollectionUtils.mappedBy;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PaymentDoTest {
@@ -35,8 +37,9 @@ public class PaymentDoTest {
      * - 결제가 완료되면 주문 상태가 변경된다. (order service 호출)
      * - 결제가 완료되면 포인트가 적립된다. (point service 호출)
      *
-     * - 구조 리팩토링한다.
-     * - service 기능구현 완료하면 주석 작성한다.
+     * - 구조 리팩토링한다. (v)
+     * - service 기능구현 완료하면 주석 작성한다. (v)
+     * - 리팩토링시 EntityDto와 Entity명칭 좀 더 상징적인 것으로 변경한다.
      */
 
     private PayService payService;
@@ -77,8 +80,7 @@ public class PaymentDoTest {
     @Test
     void 주문서의_금액과_결제금액이_일치하지_않으면_실패한다() {
         //given
-        OrderDto mockOrder = MockOrder.with(1L, 30_000);
-        stubOrderService.remember(mockOrder);
+        OrderDto mockOrder = stubOrderService.save(MockOrder.create(30_000));
 
         PaymentDoRequest.Item requestItem = new PaymentDoRequest.Item(PaymentMethod.CARD, 40_000);
         PaymentDoRequest request = new PaymentDoRequest(mockOrder.getId(), requestItem);
@@ -90,17 +92,15 @@ public class PaymentDoTest {
         PaymentDoRequest.Item requestItem2 = new PaymentDoRequest.Item(PaymentMethod.CARD, 20_000);
         PaymentDoRequest request2 = new PaymentDoRequest(mockOrder.getId(), requestItem2);
 
-        assertThrows(InvalidPaymentException.class, () -> payService.pay(request2));
+        InvalidPaymentException exception = assertThrows(InvalidPaymentException.class, () -> payService.pay(request2));
+        assertEquals(PaymentErrors.WRONG_PAYMENT_AMOUNT.getMessage(), exception.getMessage());
     }
 
     @Test
     void 중복_결제데이터가_존재하면_실패한다() {
         //given
-        OrderDto mockOrder = stubOrderService.save(MockOrder.with(1L));
-        PaymentDto mockPayment = MockPayment.builder()
-                .id(1L)
-                .build();
-        stubPaymentService.remember(mockPayment);
+        OrderDto mockOrder = stubOrderService.save(MockOrder.create());
+        stubPaymentService.save(MockPayment.create(mockOrder));
 
         PaymentDoRequest.Item requestItem = new PaymentDoRequest.Item(PaymentMethod.CARD, mockOrder.getAmount());
         PaymentDoRequest request = new PaymentDoRequest(mockOrder.getId(), requestItem);
@@ -114,7 +114,9 @@ public class PaymentDoTest {
 
     @Test
     void 결제데이터와_디테일로그데이터를_저장한다() {
-        OrderDto mockOrder = stubOrderService.save(MockOrder.with(1L));
+        //given
+        OrderDto mockOrder = stubOrderService.save(MockOrder.create());
+
         PaymentDoRequest.Item requestItem1 = new PaymentDoRequest.Item(PaymentMethod.CARD, 10_000);
         PaymentDoRequest.Item requestItem2 = new PaymentDoRequest.Item(PaymentMethod.ACCOUNT_TRANSFER, mockOrder.getAmount() - 10_000);
         PaymentDoRequest request = new PaymentDoRequest(mockOrder.getId(), requestItem1, requestItem2);
@@ -124,14 +126,17 @@ public class PaymentDoTest {
         boolean exists = stubPaymentService.existsById(savedPaymentId);
         assertTrue(exists);
 
-        List<PaymentLog> paymentLogs = stubPaymentLogService.findAllByPaymentId(savedPaymentId);
+        List<PaymentLogDto> paymentLogs = stubPaymentLogService.findAllByPaymentId(savedPaymentId);
+        assertEquals(request.getItems().size(), paymentLogs.size());
+        assertThat(mappedBy(request.getItems(), PaymentDoRequest.Item::getMethod))
+                .containsExactlyInAnyOrder(PaymentMethod.CARD, PaymentMethod.ACCOUNT_TRANSFER);
 
         assertEquals(request.totalPaymentAmount(), getTotalAmountOfPaymentLogs(paymentLogs));
     }
 
-    private int getTotalAmountOfPaymentLogs(List<PaymentLog> paymentLogs) {
+    private int getTotalAmountOfPaymentLogs(List<PaymentLogDto> paymentLogs) {
         return paymentLogs.stream()
-                .mapToInt(PaymentLog::getAmount)
+                .mapToInt(PaymentLogDto::getAmount)
                 .sum();
     }
 }
