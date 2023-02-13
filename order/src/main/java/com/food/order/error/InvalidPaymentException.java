@@ -1,7 +1,5 @@
 package com.food.order.error;
 
-import com.food.order.error.PaymentErrors;
-
 public class InvalidPaymentException extends RuntimeException {
     private final PaymentErrors error;
 
