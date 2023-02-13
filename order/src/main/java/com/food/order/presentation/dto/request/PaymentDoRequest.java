@@ -61,6 +61,19 @@ public class PaymentDoRequest {
         return Collections.unmodifiableList(items);
     }
 
+    public boolean hasItemWithPointMethod() {
+        return items.stream()
+                .anyMatch(item -> item.getMethod() == PaymentMethod.POINT);
+    }
+
+    public int getUsedPointAmount() {
+        return items.stream()
+                .filter(item -> item.getMethod() == PaymentMethod.POINT)
+                .map(Item::getAmount)
+                .findAny()
+                .orElse(0);
+    }
+
     @Getter
     public static class Item {
         private final PaymentMethod method;

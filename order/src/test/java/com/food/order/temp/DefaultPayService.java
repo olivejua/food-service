@@ -7,6 +7,9 @@ import com.food.common.payment.business.internal.PaymentCommonService;
 import com.food.common.payment.business.internal.PaymentLogCommonService;
 import com.food.common.payment.business.internal.model.PaymentDto;
 import com.food.common.payment.enumeration.PaymentActionType;
+import com.food.common.user.business.external.PointService;
+import com.food.common.user.business.external.model.PointUseRequest;
+import com.food.common.user.business.external.model.RequestUser;
 import com.food.order.error.DuplicatedPaymentException;
 import com.food.order.error.InvalidPaymentException;
 import com.food.order.error.NotFoundOrderException;
@@ -22,9 +25,10 @@ public class DefaultPayService implements PayService {
     private final OrderCommonService orderCommonService;
     private final PaymentCommonService paymentCommonService;
     private final PaymentLogCommonService paymentLogRepository;
+    private final PointService pointService;
 
     @Override
-    public Long pay(PaymentDoRequest request) {
+    public Long pay(PaymentDoRequest request, RequestUser requestUser) {
         OrderDto order = orderCommonService.findById(request.getOrderId())
                 .orElseThrow(() -> new NotFoundOrderException(request.getOrderId()));
 
@@ -42,11 +46,21 @@ public class DefaultPayService implements PayService {
                 .build();
         Long paymentId = paymentCommonService.save(paymentDto).getId();
 
+        usePoints(request, requestUser);
+
         Set<PaymentElement> paymentElements = request.getItems().stream()
                 .map(item -> PaymentElement.findPaymentElement(item.getMethod(), item.getAmount()))
                 .collect(Collectors.toSet());
         paymentLogRepository.saveAll(paymentId, paymentElements);
 
         return paymentId;
+    }
+
+    private void usePoints(PaymentDoRequest request, RequestUser requestUser) {
+        if (request.hasItemWithPointMethod()) {
+            PointUseRequest pointUseRequest = new PointUseRequest(request.getUsedPointAmount(), requestUser.getUserId());
+
+            pointService.use(pointUseRequest);
+        }
     }
 }
