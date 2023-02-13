@@ -17,4 +17,12 @@ public abstract class PaymentElement {
     }
 
     public abstract PaymentMethod method();
+
+    public static PaymentElement findPaymentElement(PaymentMethod method, Integer amount) {
+        return switch (method) {
+            case CARD -> new CardPayment(amount);
+            case ACCOUNT_TRANSFER -> new AccountTransferPayment(amount);
+            case POINT -> new PointPayment(amount);
+        };
+    }
 }

@@ -3,6 +3,7 @@ package com.food.common.payment.business.internal.impl;
 import com.food.common.order.business.internal.impl.OrderEntityService;
 import com.food.common.order.domain.Order;
 import com.food.common.payment.business.internal.PaymentCommonService;
+import com.food.common.payment.business.internal.model.PaymentDto;
 import com.food.common.payment.domain.Payment;
 import com.food.common.payment.enumeration.PaymentActionType;
 import com.food.common.payment.repository.PaymentRepository;
@@ -18,11 +19,11 @@ public class DefaultPaymentCommonService implements PaymentCommonService {
     private final OrderEntityService orderEntityService;
 
     @Override
-    public Long save(Long orderId, PaymentActionType actionType) {
-        Order order = orderEntityService.findById(orderId);
-        Payment payment = Payment.create(order, actionType);
+    public PaymentDto save(PaymentDto paymentDto) {
+        Order order = orderEntityService.findById(paymentDto.getOrderId());
+        Payment payment = Payment.create(order, paymentDto.getActionType());
 
-        return paymentRepository.save(payment).getId();
+        return new PaymentDto(paymentRepository.save(payment));
     }
 
     @Override
@@ -31,5 +32,10 @@ public class DefaultPaymentCommonService implements PaymentCommonService {
                 .orElseThrow(() -> new IllegalArgumentException("결제 내역이 존재하지 않습니다. paymentId=" + paymentId));
 
         payment.update(actionType);
+    }
+
+    @Override
+    public boolean existsById(Long id) {
+        return paymentRepository.existsById(id);
     }
 }

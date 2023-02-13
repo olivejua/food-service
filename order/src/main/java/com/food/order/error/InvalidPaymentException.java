@@ -1,6 +1,4 @@
-package com.food.order.temp;
-
-import com.food.order.error.PaymentErrors;
+package com.food.order.error;
 
 public class InvalidPaymentException extends RuntimeException {
     private final PaymentErrors error;

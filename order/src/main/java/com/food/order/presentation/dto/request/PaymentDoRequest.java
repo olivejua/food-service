@@ -2,11 +2,9 @@ package com.food.order.presentation.dto.request;
 
 import com.food.common.payment.enumeration.PaymentMethod;
 import com.food.order.error.InvalidPaymentDoParameterException;
+import lombok.Getter;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class PaymentDoRequest {
@@ -50,13 +48,33 @@ public class PaymentDoRequest {
     }
 
     public boolean hasSameTotalAmountAs(Integer amount) {
-        int totalPaymentAmount = items.stream()
-                .mapToInt(item -> item.amount)
-                .sum();
-
-        return totalPaymentAmount == amount;
+        return totalPaymentAmount() == amount;
     }
 
+    public int totalPaymentAmount() {
+        return items.stream()
+                .mapToInt(item -> item.amount)
+                .sum();
+    }
+
+    public List<Item> getItems() {
+        return Collections.unmodifiableList(items);
+    }
+
+    public boolean hasItemWithPointMethod() {
+        return items.stream()
+                .anyMatch(item -> item.getMethod() == PaymentMethod.POINT);
+    }
+
+    public int getUsedPointAmount() {
+        return items.stream()
+                .filter(item -> item.getMethod() == PaymentMethod.POINT)
+                .map(Item::getAmount)
+                .findAny()
+                .orElse(0);
+    }
+
+    @Getter
     public static class Item {
         private final PaymentMethod method;
         private final Integer amount;

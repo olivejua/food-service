@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface PaymentLogRepository extends JpaRepository<PaymentLog, Long> {
     List<PaymentLog> findAllByPayment(Payment payment);
+
+    List<PaymentLog> findAllByPaymentId(Long paymentId);
 }

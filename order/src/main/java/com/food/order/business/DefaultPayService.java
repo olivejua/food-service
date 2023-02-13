@@ -7,7 +7,8 @@ import com.food.common.payment.business.external.model.PayRequest;
 import com.food.common.payment.business.external.model.payrequest.PointPayment;
 import com.food.common.payment.business.internal.PaymentCommonService;
 import com.food.common.payment.business.internal.PaymentLogCommonService;
-import com.food.common.payment.domain.PaymentLog;
+import com.food.common.payment.business.internal.model.PaymentDto;
+import com.food.common.payment.business.internal.model.PaymentLogDto;
 import com.food.common.payment.enumeration.PaymentActionType;
 import com.food.common.payment.enumeration.PaymentMethod;
 import com.food.common.user.business.external.PointService;
@@ -40,12 +41,16 @@ public class DefaultPayService implements PayService {
 
         usePoints(payment);
 
-        Long paymentId = paymentCommonService.save(payment.getOrderId(), payment.getActionType());
-        paymentLogCommonService.saveAll(paymentId, payment.getPayments());
+        PaymentDto paymentDto = PaymentDto.builder()
+                .orderId(payment.getOrderId())
+                .actionType(payment.getActionType())
+                .build();
+        Long savedPaymentId = paymentCommonService.save(paymentDto).getId();
+        paymentLogCommonService.saveAll(savedPaymentId, payment.getPayments());
 
-        collectPoints(payment, paymentId);
+        collectPoints(payment, savedPaymentId);
 
-        return paymentId;
+        return savedPaymentId;
     }
 
     private void usePoints(PayRequest payment) {
@@ -69,8 +74,8 @@ public class DefaultPayService implements PayService {
     public void cancelPayment(Long paymentId, RequestUser requestUser) {
         paymentCommonService.updateActionType(paymentId, PaymentActionType.CANCELLATION);
 
-        List<PaymentLog> paymentLogs = paymentLogCommonService.findAllByPaymentId(paymentId);
-        Optional<PaymentLog> pointPaymentLog = filterPointPaymentLog(paymentLogs);
+        List<PaymentLogDto> paymentLogs = paymentLogCommonService.findAllByPaymentId(paymentId);
+        Optional<PaymentLogDto> pointPaymentLog = filterPointPaymentLog(paymentLogs);
 
         pointPaymentLog
                 .ifPresent(paymentLog -> pointService.recollectUsedPoint(paymentLog.getPointId()));
@@ -78,7 +83,7 @@ public class DefaultPayService implements PayService {
         pointService.retrieveCollectedPoint(paymentId);
     }
 
-    private Optional<PaymentLog> filterPointPaymentLog(List<PaymentLog> paymentLogs) {
+    private Optional<PaymentLogDto> filterPointPaymentLog(List<PaymentLogDto> paymentLogs) {
         return paymentLogs.stream()
                 .filter(log -> log.getMethod() == PaymentMethod.POINT)
                 .findAny();

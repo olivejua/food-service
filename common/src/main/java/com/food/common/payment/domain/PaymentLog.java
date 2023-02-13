@@ -48,20 +48,23 @@ public class PaymentLog extends BaseTimeEntity {
     @JoinColumn(name = "point_id")
     private Point point;
 
-    public static PaymentLog create(Payment payment, PaymentMethod method, Integer amount) {
+    public static PaymentLog create(Long id, Payment payment, PaymentMethod method, Integer amount, Point point) {
         PaymentLog paymentLog = new PaymentLog();
+        paymentLog.id = id;
         paymentLog.payment = payment;
         paymentLog.method = method;
         paymentLog.amount = amount;
+        paymentLog.point = point;
 
         return paymentLog;
     }
 
-    public static PaymentLog create(Payment payment, PaymentMethod method, Integer amount, Point point) {
-        PaymentLog paymentLog = PaymentLog.create(payment, method, amount);
-        paymentLog.point = point;
+    public static PaymentLog create(Payment payment, PaymentMethod method, Integer amount) {
+        return create(null, payment, method, amount, null);
+    }
 
-        return paymentLog;
+    public static PaymentLog create(Payment payment, PaymentMethod method, Integer amount, Point point) {
+        return create(null, payment, method, amount, point);
     }
 
     public Long getPaymentId() {

@@ -1,4 +1,4 @@
-package com.food.order.temp;
+package com.food.order.error;
 
 import com.food.common.error.ApplicationErrors;
 import lombok.RequiredArgsConstructor;
