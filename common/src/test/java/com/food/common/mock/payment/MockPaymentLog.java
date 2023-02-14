@@ -3,7 +3,6 @@ package com.food.common.mock.payment;
 import com.food.common.mock.user.MockPoint;
 import com.food.common.payment.domain.Payment;
 import com.food.common.payment.domain.PaymentLog;
-import com.food.common.payment.enumeration.PaymentActionType;
 import com.food.common.payment.enumeration.PaymentMethod;
 import com.food.common.user.domain.Point;
 
@@ -16,7 +15,6 @@ public class MockPaymentLog {
         private Long id;
         private Payment payment = MockPayment.builder().build();
         private PaymentMethod method = PaymentMethod.CARD;
-        private PaymentActionType type = PaymentActionType.PAYMENT;
         private Integer amount = 24000;
         private Point point = MockPoint.builder().build();
 
@@ -27,11 +25,6 @@ public class MockPaymentLog {
 
         public Builder payment(Payment payment) {
             this.payment = payment;
-            return this;
-        }
-
-        public Builder actionType(PaymentActionType type) {
-            this.type = type;
             return this;
         }
 
@@ -51,7 +44,7 @@ public class MockPaymentLog {
         }
 
         public PaymentLog build() {
-            return PaymentLog.create(payment, method, amount, point);
+            return PaymentLog.create(payment, method, amount);
         }
     }
 }
