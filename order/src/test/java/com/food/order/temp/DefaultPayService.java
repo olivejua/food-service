@@ -17,6 +17,7 @@ import com.food.order.error.DuplicatedPaymentException;
 import com.food.order.error.InvalidPaymentException;
 import com.food.order.error.NotFoundOrderException;
 import com.food.order.error.PaymentErrors;
+import com.food.order.mock.MockRequestUser;
 import com.food.order.presentation.dto.request.PaymentDoRequest;
 import lombok.RequiredArgsConstructor;
 
@@ -85,5 +86,15 @@ public class DefaultPayService implements PayService {
                 .filter(element -> element.method() != PaymentMethod.POINT)
                 .mapToInt(PaymentElement::getAmount)
                 .sum();
+    }
+
+    @Override
+    public void cancel(Long paymentId, MockRequestUser mockRequestUser) {
+        PaymentDto payment = paymentCommonService.findById(paymentId)
+                .orElseThrow(() -> new NotFoundPaymentException(paymentId));
+
+        if (payment.isCanceled()) {
+            throw new InvalidPaymentActionTypeException("이미 취소된 주문정보입니다.");
+        }
     }
 }

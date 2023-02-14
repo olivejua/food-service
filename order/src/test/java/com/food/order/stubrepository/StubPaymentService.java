@@ -6,6 +6,7 @@ import com.food.common.payment.enumeration.PaymentActionType;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public class StubPaymentService implements PaymentCommonService {
     private final Map<Long, PaymentDto> data = new HashMap<>();
@@ -34,5 +35,10 @@ public class StubPaymentService implements PaymentCommonService {
     @Override
     public boolean existsById(Long id) {
         return data.containsKey(id);
+    }
+
+    @Override
+    public Optional<PaymentDto> findById(Long id) {
+        return Optional.ofNullable(data.get(id));
     }
 }
