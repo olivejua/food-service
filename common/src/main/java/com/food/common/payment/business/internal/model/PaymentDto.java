@@ -23,4 +23,8 @@ public final class PaymentDto {
         orderId = payment.getOrder().getId();
         actionType = payment.getActionType();
     }
+
+    public boolean isCanceled() {
+        return actionType == PaymentActionType.CANCELLATION;
+    }
 }
