@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @RequiredArgsConstructor
 @Transactional
 @Service
@@ -37,5 +39,11 @@ public class DefaultPaymentCommonService implements PaymentCommonService {
     @Override
     public boolean existsById(Long id) {
         return paymentRepository.existsById(id);
+    }
+
+    @Override
+    public Optional<PaymentDto> findById(Long id) {
+        return paymentRepository.findById(id)
+                .map(PaymentDto::new);
     }
 }
