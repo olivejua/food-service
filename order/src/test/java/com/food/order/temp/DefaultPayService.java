@@ -8,7 +8,9 @@ import com.food.common.payment.business.internal.PaymentCommonService;
 import com.food.common.payment.business.internal.PaymentLogCommonService;
 import com.food.common.payment.business.internal.model.PaymentDto;
 import com.food.common.payment.enumeration.PaymentActionType;
+import com.food.common.payment.enumeration.PaymentMethod;
 import com.food.common.user.business.external.PointService;
+import com.food.common.user.business.external.model.PointCollectRequest;
 import com.food.common.user.business.external.model.PointUseRequest;
 import com.food.common.user.business.external.model.RequestUser;
 import com.food.order.error.DuplicatedPaymentException;
@@ -50,6 +52,8 @@ public class DefaultPayService implements PayService {
         Set<PaymentElement> paymentElements = getPaymentElements(request, requestUser);
         paymentLogRepository.saveAll(paymentId, paymentElements);
 
+        collectPoint(requestUser, paymentId, paymentElements);
+
         return paymentId;
     }
 
@@ -69,5 +73,17 @@ public class DefaultPayService implements PayService {
             PointUseRequest pointUseRequest = new PointUseRequest(pointPayment.getAmount(), requestUser.getUserId());
             pointPayment.updateUsedPointId(pointService.use(pointUseRequest));
         }
+    }
+
+    private void collectPoint(RequestUser requestUser, Long paymentId, Set<PaymentElement> paymentElements) {
+        PointCollectRequest collectRequest = new PointCollectRequest(requestUser.getUserId(), paymentId, calculateActualPaymentAmount(paymentElements));
+        pointService.collect(collectRequest);
+    }
+
+    private Integer calculateActualPaymentAmount(Set<PaymentElement> elements) {
+        return elements.stream()
+                .filter(element -> element.method() != PaymentMethod.POINT)
+                .mapToInt(PaymentElement::getAmount)
+                .sum();
     }
 }

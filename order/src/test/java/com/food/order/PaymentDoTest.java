@@ -93,7 +93,7 @@ public class PaymentDoTest {
         PaymentDoRequest request = new PaymentDoRequest(mockOrder.getId(), requestItem);
 
         //when & then
-        assertThrows(InvalidPaymentException.class, () -> payService.pay(request, null));
+        assertThrows(InvalidPaymentException.class, () -> payService.pay(request, mockRequestUser));
 
         //given
         PaymentDoRequest.Item requestItem2 = new PaymentDoRequest.Item(PaymentMethod.CARD, 20_000);
@@ -115,7 +115,7 @@ public class PaymentDoTest {
         //when & then
         DuplicatedPaymentException exception = assertThrows(
                 DuplicatedPaymentException.class,
-                () -> payService.pay(request, null));
+                () -> payService.pay(request, mockRequestUser));
         assertTrue(exception.getMessage().contains("해당 주문서에 대한 결제내역이 존재합니다."));
     }
 
@@ -129,7 +129,7 @@ public class PaymentDoTest {
         PaymentDoRequest request = new PaymentDoRequest(mockOrder.getId(), requestItem1, requestItem2);
 
         //when
-        Long savedPaymentId = payService.pay(request, null);
+        Long savedPaymentId = payService.pay(request, mockRequestUser);
 
         //then
         boolean exists = stubPaymentService.existsById(savedPaymentId);
@@ -163,14 +163,17 @@ public class PaymentDoTest {
         assertNotNull(pointPaymentLog.getPointId());
     }
 
-//    @Test
-//    void 결제가_완료되면_포인트사용금액을_제외한_총금액으로_포인트적립_요청한다() {
-//        OrderDto mockOrder = stubOrderService.save(MockOrder.create());
-//        PaymentDoRequest.Item requestItem1 = new PaymentDoRequest.Item(PaymentMethod.CARD, 10_000);
-//
-//
-//        assertTrue(stubPointService.isCalledToCollect());
-//    }
+    @Test
+    void 결제가_완료되면_포인트사용금액을_제외한_총금액으로_포인트적립_요청한다() {
+        OrderDto mockOrder = stubOrderService.save(MockOrder.create());
+        PaymentDoRequest.Item requestItem = new PaymentDoRequest.Item(PaymentMethod.CARD, mockOrder.getAmount());
+        PaymentDoRequest request = new PaymentDoRequest(mockOrder.getId(), requestItem);
+
+        payService.pay(request, mockRequestUser);
+
+        assertTrue(stubPointService.isCalledToCollect());
+        assertEquals(stubPointService.getCollectedAmount(), requestItem.getAmount());
+    }
 
     private OrderDto savedMockOrder(int amount) {
         return stubOrderService.save(MockOrder.create(amount));
