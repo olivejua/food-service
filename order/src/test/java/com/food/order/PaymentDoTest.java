@@ -38,7 +38,7 @@ public class PaymentDoTest {
      * - 결제수단에 포인트가 존재하면 잔여포인트를 차감한다. (잔여포인트가 충분해야한다. MSG: 잔여포인트가 부족합니다.) (point service 호출)
      * - DB에 결제 내역과 로그가 저장되어야한다. (v)
      * - 결제가 완료되면 주문 상태가 변경된다. (order service 호출)
-     * - 결제가 완료되면 포인트가 적립된다. (point service 호출)
+     * - 결제가 완료되면 포인트가 적립된다. (point service 호출) (v)
      *
      * - 구조 리팩토링한다. (v)
      * - service 기능구현 완료하면 주석 작성한다. (v)
@@ -120,7 +120,7 @@ public class PaymentDoTest {
     }
 
     @Test
-    void 결제데이터와_디테일로그데이터를_저장한다() {
+    void 카드와_계좌이체로_결제시_결제데이터와_디테일로그데이터를_정상적으로_저장한다() {
         //given
         OrderDto mockOrder = savedMockOrder();
 
@@ -143,24 +143,47 @@ public class PaymentDoTest {
                 .containsExactlyInAnyOrder(PaymentMethod.CARD, PaymentMethod.ACCOUNT_TRANSFER);
 
         assertEquals(request.totalPaymentAmount(), getTotalAmountOfPaymentLogs(paymentLogs));
+    }
 
-
+    @Test
+    void 포인트로_결제시_포인트아이디가_추가로_부여된다() {
         //given: 포인트로 결제한다.
-        OrderDto mockOrder2 = stubOrderService.save(MockOrder.create(12_000));
-        PaymentDoRequest.Item requestItem3 = new PaymentDoRequest.Item(PaymentMethod.POINT, mockOrder2.getAmount());
-        PaymentDoRequest request2 = new PaymentDoRequest(mockOrder2.getId(), requestItem3);
+        OrderDto mockOrder = stubOrderService.save(MockOrder.create(12_000));
+        PaymentDoRequest.Item requestItem = new PaymentDoRequest.Item(PaymentMethod.POINT, mockOrder.getAmount());
+        PaymentDoRequest request = new PaymentDoRequest(mockOrder.getId(), requestItem);
 
         //when
-        Long savedPaymentId2 = payService.pay(request2, mockRequestUser);
+        Long savedPaymentId = payService.pay(request, mockRequestUser);
 
         //then
         assertTrue(stubPointService.isCalledToUse());
 
-        List<PaymentLogDto> paymentLogs2 = stubPaymentLogService.findAllByPaymentId(savedPaymentId2);
-        assertEquals(1, paymentLogs2.size());
-        PaymentLogDto pointPaymentLog = paymentLogs2.get(0);
-        assertEquals(savedPaymentId2, pointPaymentLog.getPaymentId());
+        List<PaymentLogDto> paymentLogs = stubPaymentLogService.findAllByPaymentId(savedPaymentId);
+        assertEquals(1, paymentLogs.size());
+        PaymentLogDto pointPaymentLog = paymentLogs.get(0);
         assertNotNull(pointPaymentLog.getPointId());
+    }
+
+    @Test
+    void 포인트로_결제하지않으면_포인트아이디가_추가로_부여되지_않는다() {
+        //given
+        OrderDto mockOrder2 = savedMockOrder();
+
+        PaymentDoRequest.Item requestItem1 = new PaymentDoRequest.Item(PaymentMethod.CARD, 10_000);
+        PaymentDoRequest.Item requestItem2 = new PaymentDoRequest.Item(PaymentMethod.ACCOUNT_TRANSFER, mockOrder2.getAmount() - 10_000);
+        PaymentDoRequest request = new PaymentDoRequest(mockOrder2.getId(), requestItem1, requestItem2);
+
+        //when
+        Long savedPaymentId2 = payService.pay(request, mockRequestUser);
+
+        //then
+        assertFalse(stubPointService.isCalledToUse()); //Point 사용 요청이 없었으니 호출도 없어야한다.
+
+        List<PaymentLogDto> paymentLogs = stubPaymentLogService.findAllByPaymentId(savedPaymentId2);
+        assertEquals(request.getItems().size(), paymentLogs.size());
+        for (PaymentLogDto paymentLogDto : paymentLogs) {
+            assertNull(paymentLogDto.getPointId());
+        }
     }
 
     @Test
@@ -174,6 +197,7 @@ public class PaymentDoTest {
         assertTrue(stubPointService.isCalledToCollect());
         assertEquals(stubPointService.getCollectedAmount(), requestItem.getAmount());
     }
+
 
     private OrderDto savedMockOrder(int amount) {
         return stubOrderService.save(MockOrder.create(amount));
