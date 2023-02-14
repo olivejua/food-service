@@ -87,7 +87,7 @@ public class PaymentDoTest {
     @Test
     void 주문서의_금액과_결제금액이_일치하지_않으면_실패한다() {
         //given
-        OrderDto mockOrder = stubOrderService.save(MockOrder.create(30_000));
+        OrderDto mockOrder = savedMockOrder(30_000);
 
         PaymentDoRequest.Item requestItem = new PaymentDoRequest.Item(PaymentMethod.CARD, 40_000);
         PaymentDoRequest request = new PaymentDoRequest(mockOrder.getId(), requestItem);
@@ -106,7 +106,7 @@ public class PaymentDoTest {
     @Test
     void 중복_결제데이터가_존재하면_실패한다() {
         //given
-        OrderDto mockOrder = stubOrderService.save(MockOrder.create());
+        OrderDto mockOrder = savedMockOrder();
         stubPaymentService.save(MockPayment.create(mockOrder));
 
         PaymentDoRequest.Item requestItem = new PaymentDoRequest.Item(PaymentMethod.CARD, mockOrder.getAmount());
@@ -122,7 +122,7 @@ public class PaymentDoTest {
     @Test
     void 결제데이터와_디테일로그데이터를_저장한다() {
         //given
-        OrderDto mockOrder = stubOrderService.save(MockOrder.create());
+        OrderDto mockOrder = savedMockOrder();
 
         PaymentDoRequest.Item requestItem1 = new PaymentDoRequest.Item(PaymentMethod.CARD, 10_000);
         PaymentDoRequest.Item requestItem2 = new PaymentDoRequest.Item(PaymentMethod.ACCOUNT_TRANSFER, mockOrder.getAmount() - 10_000);
@@ -161,6 +161,23 @@ public class PaymentDoTest {
         PaymentLogDto pointPaymentLog = paymentLogs2.get(0);
         assertEquals(savedPaymentId2, pointPaymentLog.getPaymentId());
         assertNotNull(pointPaymentLog.getPointId());
+    }
+
+//    @Test
+//    void 결제가_완료되면_포인트사용금액을_제외한_총금액으로_포인트적립_요청한다() {
+//        OrderDto mockOrder = stubOrderService.save(MockOrder.create());
+//        PaymentDoRequest.Item requestItem1 = new PaymentDoRequest.Item(PaymentMethod.CARD, 10_000);
+//
+//
+//        assertTrue(stubPointService.isCalledToCollect());
+//    }
+
+    private OrderDto savedMockOrder(int amount) {
+        return stubOrderService.save(MockOrder.create(amount));
+    }
+
+    private OrderDto savedMockOrder() {
+        return stubOrderService.save(MockOrder.create());
     }
 
     private int getTotalAmountOfPaymentLogs(List<PaymentLogDto> paymentLogs) {
