@@ -39,6 +39,7 @@ public class StubPaymentLogService implements PaymentLogCommonService {
                     .paymentId(paymentId)
                     .method(element.method())
                     .amount(element.getAmount())
+                    .pointId(element.getPointId().orElse(null))
                     .build();
 
             save(paymentLogDto);

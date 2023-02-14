@@ -6,6 +6,7 @@ import com.food.common.user.domain.Point;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
+import org.springframework.validation.annotation.Validated;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -17,6 +18,7 @@ import static javax.persistence.FetchType.LAZY;
 import static javax.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
+@Validated
 @Getter
 @NoArgsConstructor(access = PROTECTED)
 @Table(name = "tb_payment_log")
@@ -63,8 +65,8 @@ public class PaymentLog extends BaseTimeEntity {
         return create(null, payment, method, amount, null);
     }
 
-    public static PaymentLog create(Payment payment, PaymentMethod method, Integer amount, Point point) {
-        return create(null, payment, method, amount, point);
+    public void update(@NotNull Point point) {
+        this.point = point;
     }
 
     public Long getPaymentId() {

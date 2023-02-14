@@ -1,7 +1,6 @@
 package com.food.common.payment.business.internal.impl;
 
 import com.food.common.payment.business.external.model.payrequest.PaymentElement;
-import com.food.common.payment.business.external.model.payrequest.PointPayment;
 import com.food.common.payment.business.internal.PaymentLogCommonService;
 import com.food.common.payment.business.internal.model.PaymentLogDto;
 import com.food.common.payment.domain.Payment;
@@ -30,21 +29,20 @@ public class DefaultPaymentLogCommonService implements PaymentLogCommonService {
         Payment payment = paymentEntityService.findById(paymentId);
 
         Set<PaymentLog> paymentLogs = elements.stream()
-                .map(logRequest -> toEntity(payment, logRequest))
+                .map(logRequest -> {
+                    PaymentLog paymentLog = PaymentLog.create(payment, logRequest.method(), logRequest.getAmount());
+                    logRequest.getPointId().ifPresent(pointId -> updatePoint(paymentLog, pointId));
+
+                    return paymentLog;
+                })
                 .collect(Collectors.toSet());
 
         paymentLogRepository.saveAll(paymentLogs);
     }
 
-    private PaymentLog toEntity(Payment payment, PaymentElement logRequest) {
-        if (logRequest instanceof PointPayment pointPayment) {
-            pointPayment.validate();
-            Point point = pointEntityService.findById(pointPayment.getPointId());
-
-            return PaymentLog.create(payment, pointPayment.method(), pointPayment.getAmount(), point);
-        }
-
-        return PaymentLog.create(payment, logRequest.method(), logRequest.getAmount());
+    private void updatePoint(PaymentLog paymentLog, Long pointId) {
+        Point point = pointEntityService.findById(pointId);
+        paymentLog.update(point);
     }
 
     @Override

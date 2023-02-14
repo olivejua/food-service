@@ -8,6 +8,7 @@ public class StubPointService implements PointService {
     private boolean calledToUsePoints = false;
     private boolean calledToCollectPoints = false;
     private Long autoIncrementKey = -1L;
+    private Integer collectedAmount;
 
     public boolean isCalledToCollect() {
         return calledToCollectPoints;
@@ -15,6 +16,10 @@ public class StubPointService implements PointService {
 
     public boolean isCalledToUse() {
         return calledToUsePoints;
+    }
+
+    public Integer getCollectedAmount() {
+        return collectedAmount;
     }
 
     @Override
@@ -27,6 +32,7 @@ public class StubPointService implements PointService {
     @Override
     public void collect(PointCollectRequest request) {
         calledToCollectPoints = true;
+        collectedAmount = request.getPaymentAmount();
     }
 
     @Override

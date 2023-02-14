@@ -3,6 +3,7 @@ package com.food.common.payment.business.external.model.payrequest;
 import com.food.common.payment.enumeration.PaymentMethod;
 
 import javax.validation.constraints.NotNull;
+import java.util.Optional;
 
 public abstract class PaymentElement {
     @NotNull
@@ -24,5 +25,9 @@ public abstract class PaymentElement {
             case ACCOUNT_TRANSFER -> new AccountTransferPayment(amount);
             case POINT -> new PointPayment(amount);
         };
+    }
+
+    public Optional<Long> getPointId() {
+        return Optional.empty();
     }
 }
