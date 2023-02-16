@@ -14,6 +14,11 @@ public interface PaymentCommonService {
      */
     PaymentDto save(@NotNull PaymentDto paymentDto);
 
+    /**
+     * 주어진 결제 Id를 가진 결제 데이터를 액션타입을 주어진 actionType값으로 변경한다.
+     * @param paymentId 결제 ID. null일 수 없다.
+     * @param actionType 변경할 액션타입 (결제 또는 취소). null일 수 없다.
+     */
     void updateActionType(@NotNull Long paymentId, @NotNull PaymentActionType actionType);
 
     /**

@@ -30,7 +30,13 @@ public class StubPaymentService implements PaymentCommonService {
     }
 
     @Override
-    public void updateActionType(Long paymentId, PaymentActionType actionType) {}
+    public void updateActionType(Long paymentId, PaymentActionType actionType) {
+        PaymentDto payment = findById(paymentId)
+                .map(findPayment -> new PaymentDto(findPayment.getId(), findPayment.getOrderId(), actionType))
+                .orElseThrow(IllegalArgumentException::new);
+
+        data.put(paymentId, payment);
+    }
 
     @Override
     public boolean existsById(Long id) {

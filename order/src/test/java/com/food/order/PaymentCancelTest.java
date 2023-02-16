@@ -14,6 +14,8 @@ import com.food.order.temp.PayService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PaymentCancelTest {
@@ -91,5 +93,24 @@ public class PaymentCancelTest {
 
         //when & then
         assertDoesNotThrow(() -> payService.cancel(paymentId2, mockRequestUser));
+    }
+
+    @Test
+    void 결제상태를_취소로_변경한다() {
+        //given
+        PaymentDto payment = PaymentDto.builder()
+                .actionType(PaymentActionType.PAYMENT)
+                .build();
+        Long paymentId = stubPaymentService.save(payment).getId();
+
+        //when
+        payService.cancel(paymentId, mockRequestUser);
+
+        //then
+        Optional<PaymentDto> findPaymentOptional = stubPaymentService.findById(paymentId);
+        assertTrue(findPaymentOptional.isPresent());
+
+        PaymentDto findPayment = findPaymentOptional.get();
+        assertEquals(PaymentActionType.CANCELLATION, findPayment.getActionType());
     }
 }

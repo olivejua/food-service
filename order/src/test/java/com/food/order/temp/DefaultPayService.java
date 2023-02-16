@@ -96,5 +96,7 @@ public class DefaultPayService implements PayService {
         if (payment.isCanceled()) {
             throw new InvalidPaymentActionTypeException("이미 취소된 주문정보입니다.");
         }
+
+        paymentCommonService.updateActionType(paymentId, PaymentActionType.CANCELLATION);
     }
 }
