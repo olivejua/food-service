@@ -29,8 +29,8 @@ public class PaymentCancelTest {
     /**
      * 요청정보인 PaymentId의 결제정보가 존재해야한다. (v)
      * 결제 정보의 ActionType이 '취소'이면 취소처리에 실패한다. (v)
-     * 결제 정보의 상태를 '취소'로 변경한다.
-     * 포인트 사용 금액이 있다면 재적립한다.
+     * 결제 정보의 상태를 '취소'로 변경한다. (v)
+     * 포인트 사용 금액이 있다면 재적립한다. (v)
      * 포인트 적립 금액이 있다면 회수한다.
      */
 
@@ -124,7 +124,7 @@ public class PaymentCancelTest {
     @Test
     void 취소한_결제정보에_결제수단으로_포인트사용내역이_존재하면_재적립_로직을_호출한다() {
         //given
-        OrderDto mockOrder = stubOrderService.save(MockOrder.create(30000));
+        OrderDto mockOrder = stubOrderService.save(MockOrder.create(30_000));
         PaymentDto mockPayment = stubPaymentService.save(MockPayment.create(mockOrder, PAYMENT));
         stubPaymentLogService.save(MockPaymentLog.create(mockPayment, POINT, 10_000));
         stubPaymentLogService.save(MockPaymentLog.create(mockPayment, CARD, 20_000));
@@ -139,7 +139,7 @@ public class PaymentCancelTest {
     @Test
     void 취소한_결제정보에_결제수단으로_포인트사용내역이_존재하지_않으면_재적립_로직을_호출하지_않는다() {
         //given
-        OrderDto mockOrder2 = stubOrderService.save(MockOrder.create(20000));
+        OrderDto mockOrder2 = stubOrderService.save(MockOrder.create(20_000));
         PaymentDto mockPayment2 = stubPaymentService.save(MockPayment.create(mockOrder2, PAYMENT));
         stubPaymentLogService.save(MockPaymentLog.create(mockPayment2, CARD, 20_000));
 
@@ -148,5 +148,34 @@ public class PaymentCancelTest {
 
         //then
         assertFalse(stubPointService.isCalledToRecollect());
+    }
+
+    @Test
+    void 취소한_결제정보의_적립된_포인트금액이_존재하면_포인트회수_로직을_호출한다() {
+        //given
+        OrderDto mockOrder = stubOrderService.save(MockOrder.create(30_000));
+        PaymentDto mockPayment = stubPaymentService.save(MockPayment.create(mockOrder, PAYMENT));
+        stubPaymentLogService.save(MockPaymentLog.create(mockPayment, POINT, 10_000));
+        stubPaymentLogService.save(MockPaymentLog.create(mockPayment, CARD, 20_000));
+
+        //when
+        payService.cancel(mockPayment.getId(), mockRequestUser);
+
+        //then
+        assertTrue(stubPointService.isCalledToRetrieve());
+    }
+
+    @Test
+    void 취소한_결제정보의_적립된_포인트금액이_존재하지_않으면_포인트회수_로직을_호출하지_않는다() {
+        //given
+        OrderDto mockOrder = stubOrderService.save(MockOrder.create(15_000));
+        PaymentDto mockPayment = stubPaymentService.save(MockPayment.create(mockOrder, PAYMENT));
+        stubPaymentLogService.save(MockPaymentLog.create(mockPayment, POINT, 15_000));
+
+        //when
+        payService.cancel(mockPayment.getId(), mockRequestUser);
+
+        //then
+        assertFalse(stubPointService.isCalledToRetrieve());
     }
 }

@@ -7,6 +7,7 @@ import com.food.common.payment.business.external.model.payrequest.PointPayment;
 import com.food.common.payment.business.internal.PaymentCommonService;
 import com.food.common.payment.business.internal.PaymentLogCommonService;
 import com.food.common.payment.business.internal.model.PaymentDto;
+import com.food.common.payment.business.internal.model.PaymentLogDto;
 import com.food.common.payment.enumeration.PaymentActionType;
 import com.food.common.payment.enumeration.PaymentMethod;
 import com.food.common.user.business.external.PointService;
@@ -21,6 +22,7 @@ import com.food.order.mock.MockRequestUser;
 import com.food.order.presentation.dto.request.PaymentDoRequest;
 import lombok.RequiredArgsConstructor;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -99,10 +101,21 @@ public class DefaultPayService implements PayService {
 
         paymentCommonService.updateActionType(paymentId, PaymentActionType.CANCELLATION);
 
-        paymentLogRepository.findAllByPaymentId(paymentId)
+        List<PaymentLogDto> paymentLogs = paymentLogRepository.findAllByPaymentId(paymentId);
+
+        paymentLogs
                 .stream()
                 .filter(paymentLog -> paymentLog.getMethod() == PaymentMethod.POINT)
                 .findAny()
                 .ifPresent(pointPayment -> pointService.recollectUsedPoint(pointPayment.getPointId()));
+
+        int paymentAmount = paymentLogs.stream()
+                .filter(paymentLog -> paymentLog.getMethod() != PaymentMethod.POINT)
+                .mapToInt(PaymentLogDto::getAmount)
+                .sum();
+
+        if (paymentAmount > 0) {
+            pointService.retrieveCollectedPoint(paymentId);
+        }
     }
 }
