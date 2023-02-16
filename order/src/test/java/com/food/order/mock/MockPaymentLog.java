@@ -1,5 +1,6 @@
 package com.food.order.mock;
 
+import com.food.common.payment.business.internal.model.PaymentDto;
 import com.food.common.payment.business.internal.model.PaymentLogDto;
 import com.food.common.payment.enumeration.PaymentActionType;
 import com.food.common.payment.enumeration.PaymentMethod;
@@ -8,6 +9,14 @@ import com.food.common.user.domain.Point;
 public class MockPaymentLog {
     public static Builder builder() {
         return new Builder();
+    }
+
+    public static PaymentLogDto create(PaymentDto payment, PaymentMethod method, int amount) {
+        return builder()
+                .paymentId(payment.getId())
+                .method(method)
+                .amount(amount)
+                .build();
     }
 
     public static class Builder {

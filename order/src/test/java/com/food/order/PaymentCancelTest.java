@@ -1,7 +1,10 @@
 package com.food.order;
 
+import com.food.common.order.business.internal.dto.OrderDto;
 import com.food.common.payment.business.internal.model.PaymentDto;
-import com.food.common.payment.enumeration.PaymentActionType;
+import com.food.order.mock.MockOrder;
+import com.food.order.mock.MockPayment;
+import com.food.order.mock.MockPaymentLog;
 import com.food.order.mock.MockRequestUser;
 import com.food.order.stubrepository.StubOrderService;
 import com.food.order.stubrepository.StubPaymentLogService;
@@ -16,6 +19,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
+import static com.food.common.payment.enumeration.PaymentActionType.CANCELLATION;
+import static com.food.common.payment.enumeration.PaymentActionType.PAYMENT;
+import static com.food.common.payment.enumeration.PaymentMethod.CARD;
+import static com.food.common.payment.enumeration.PaymentMethod.POINT;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PaymentCancelTest {
@@ -78,7 +85,7 @@ public class PaymentCancelTest {
     void paymentId의_결제정보의_actionType이_이미_취소상태이면_예외가_발생한다() {
         //given
         PaymentDto paymentCanceled = PaymentDto.builder()
-                .actionType(PaymentActionType.CANCELLATION)
+                .actionType(CANCELLATION)
                 .build();
         Long paymentId1 = stubPaymentService.save(paymentCanceled).getId();
 
@@ -87,7 +94,7 @@ public class PaymentCancelTest {
 
         //given
         PaymentDto paymentNotCanceled = PaymentDto.builder()
-                .actionType(PaymentActionType.PAYMENT)
+                .actionType(PAYMENT)
                 .build();
         Long paymentId2 = stubPaymentService.save(paymentNotCanceled).getId();
 
@@ -99,7 +106,7 @@ public class PaymentCancelTest {
     void 결제상태를_취소로_변경한다() {
         //given
         PaymentDto payment = PaymentDto.builder()
-                .actionType(PaymentActionType.PAYMENT)
+                .actionType(PAYMENT)
                 .build();
         Long paymentId = stubPaymentService.save(payment).getId();
 
@@ -111,6 +118,35 @@ public class PaymentCancelTest {
         assertTrue(findPaymentOptional.isPresent());
 
         PaymentDto findPayment = findPaymentOptional.get();
-        assertEquals(PaymentActionType.CANCELLATION, findPayment.getActionType());
+        assertEquals(CANCELLATION, findPayment.getActionType());
+    }
+
+    @Test
+    void 취소한_결제정보에_결제수단으로_포인트사용내역이_존재하면_재적립_로직을_호출한다() {
+        //given
+        OrderDto mockOrder = stubOrderService.save(MockOrder.create(30000));
+        PaymentDto mockPayment = stubPaymentService.save(MockPayment.create(mockOrder, PAYMENT));
+        stubPaymentLogService.save(MockPaymentLog.create(mockPayment, POINT, 10_000));
+        stubPaymentLogService.save(MockPaymentLog.create(mockPayment, CARD, 20_000));
+
+        //when
+        payService.cancel(mockPayment.getId(), mockRequestUser);
+
+        //then
+        assertTrue(stubPointService.isCalledToRecollect());
+    }
+
+    @Test
+    void 취소한_결제정보에_결제수단으로_포인트사용내역이_존재하지_않으면_재적립_로직을_호출하지_않는다() {
+        //given
+        OrderDto mockOrder2 = stubOrderService.save(MockOrder.create(20000));
+        PaymentDto mockPayment2 = stubPaymentService.save(MockPayment.create(mockOrder2, PAYMENT));
+        stubPaymentLogService.save(MockPaymentLog.create(mockPayment2, CARD, 20_000));
+
+        //when
+        payService.cancel(mockPayment2.getId(), mockRequestUser);
+
+        //then
+        assertFalse(stubPointService.isCalledToRecollect());
     }
 }

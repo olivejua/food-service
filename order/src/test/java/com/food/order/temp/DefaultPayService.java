@@ -98,5 +98,11 @@ public class DefaultPayService implements PayService {
         }
 
         paymentCommonService.updateActionType(paymentId, PaymentActionType.CANCELLATION);
+
+        paymentLogRepository.findAllByPaymentId(paymentId)
+                .stream()
+                .filter(paymentLog -> paymentLog.getMethod() == PaymentMethod.POINT)
+                .findAny()
+                .ifPresent(pointPayment -> pointService.recollectUsedPoint(pointPayment.getPointId()));
     }
 }

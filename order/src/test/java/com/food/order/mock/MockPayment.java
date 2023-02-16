@@ -18,6 +18,13 @@ public class MockPayment {
                 .build();
     }
 
+    public static PaymentDto create(OrderDto order, PaymentActionType actionType) {
+        return builder()
+                .order(order)
+                .actionType(actionType)
+                .build();
+    }
+
     @NoArgsConstructor(access = PRIVATE)
     public static class Builder {
         private Long id;
@@ -34,7 +41,7 @@ public class MockPayment {
             return this;
         }
 
-        public Builder status(PaymentActionType actionType) {
+        public Builder actionType(PaymentActionType actionType) {
             this.actionType = actionType;
             return this;
         }
