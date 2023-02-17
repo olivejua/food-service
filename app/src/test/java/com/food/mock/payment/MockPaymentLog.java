@@ -46,7 +46,12 @@ public class MockPaymentLog {
         }
 
         public PaymentLog build() {
-            return PaymentLog.create(payment, method, amount, point);
+            PaymentLog paymentLog = PaymentLog.create(payment, method, amount);
+            if (point != null) {
+                paymentLog.update(point);
+            }
+
+            return paymentLog;
         }
     }
 }

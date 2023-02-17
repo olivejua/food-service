@@ -5,25 +5,21 @@ import com.food.common.order.domain.Order;
 import com.food.common.order.enumeration.OrderStatus;
 import com.food.common.order.repository.OrderRepository;
 import com.food.common.payment.business.external.PayService;
-import com.food.common.payment.business.external.model.PayRequest;
-import com.food.common.payment.business.external.model.payrequest.CardPayment;
-import com.food.common.payment.business.external.model.payrequest.PointPayment;
+import com.food.common.payment.business.external.model.PaymentDoRequest;
 import com.food.common.payment.domain.Payment;
-import com.food.common.payment.enumeration.PaymentActionType;
 import com.food.common.payment.enumeration.PaymentMethod;
 import com.food.common.store.domain.Store;
 import com.food.common.store.domain.StoreOwner;
+import com.food.common.user.business.external.model.RequestUser;
 import com.food.common.user.domain.Point;
 import com.food.common.user.domain.User;
+import com.food.common.user.enumeration.AccountType;
 import com.food.common.user.repository.PointRepository;
 import com.food.mock.order.MockOrder;
 import com.food.mock.user.MockPoint;
-import com.food.order.presentation.dto.request.PayViewRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.Set;
 
 import static org.springframework.http.HttpHeaders.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -49,10 +45,10 @@ public class PayApiTests extends SuperIntegrationTest {
     @Autowired
     private PointRepository pointRepository;
 
+    private Store mockStore;
+
     @Autowired
     private PayService payService;
-
-    private Store mockStore;
 
     @BeforeEach
     void setup() {
@@ -83,10 +79,9 @@ public class PayApiTests extends SuperIntegrationTest {
         pointRepository.save(point);
 
         //결제 요청 Request: 포인트 1,000원 사용에 49,000원 카드 결제 요청한다.
-        PayViewRequest request = new PayViewRequest(mockOrder.getId(), PaymentActionType.PAYMENT,
-                Set.of(new PayViewRequest.PaymentElementViewRequest(PaymentMethod.POINT, 1000),
-                       new PayViewRequest.PaymentElementViewRequest(PaymentMethod.CARD, mockOrder.getAmount()-1000)
-        ));
+        PaymentDoRequest request = new PaymentDoRequest(mockOrder.getId(),
+                new PaymentDoRequest.Item(PaymentMethod.POINT, 1000),
+                new PaymentDoRequest.Item(PaymentMethod.CARD, mockOrder.getAmount() - 1000));
 
         //when & then
         mvc.perform(post("/api/payments")
@@ -106,9 +101,8 @@ public class PayApiTests extends SuperIntegrationTest {
                         ),
                         requestFields(
                                 fieldWithPath("orderId").type(NUMBER).description("주문 고유번호"),
-                                fieldWithPath("actionType").type(STRING).description("결제 완료/취소 여부"),
-                                fieldWithPath("elements[].method").type(STRING).description("결제 수단"),
-                                fieldWithPath("elements[].amount").type(NUMBER).description("결제 금액")
+                                fieldWithPath("items[].method").type(STRING).description("결제 수단"),
+                                fieldWithPath("items[].amount").type(NUMBER).description("결제 금액")
                         ),
                         responseFields(
                                 fieldWithPath("success").type(BOOLEAN).description("정상 처리 여부")
@@ -127,16 +121,26 @@ public class PayApiTests extends SuperIntegrationTest {
         Order mockOrder = orderFactory.order(mockUser, mockStore, 50000, OrderStatus.REQUEST);
 
         // 포인트사용 1000원, 카드결제 49000원의 결제를 한다.
-        PayRequest request = PayRequest.builder()
-                .payerId(mockOrder.getCustomerId())
-                .actionType(PaymentActionType.PAYMENT)
-                .orderId(mockOrder.getId())
-                .elements(Set.of(
-                        new PointPayment(1000),
-                        new CardPayment(mockOrder.getAmount() - 1000)))
-                .build();
+        PaymentDoRequest request = new PaymentDoRequest(mockOrder.getId(),
+                new PaymentDoRequest.Item(PaymentMethod.POINT, 1000),
+                new PaymentDoRequest.Item(PaymentMethod.CARD, mockOrder.getAmount() - 1000));
 
-        Long paymentId = payService.pay(request);
+        Long paymentId = payService.pay(request, new RequestUser() {
+            @Override
+            public Long getUserId() {
+                return mockUser.getId();
+            }
+
+            @Override
+            public Long getAccountId() {
+                return null;
+            }
+
+            @Override
+            public AccountType getAccountType() {
+                return null;
+            }
+        });
 
         mvc.perform(delete("/api/payments/{paymentId}", paymentId)
                         .header(ACCEPT, APPLICATION_JSON_VALUE)
