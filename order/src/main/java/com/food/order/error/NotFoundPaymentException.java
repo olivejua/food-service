@@ -1,6 +1,4 @@
-package com.food.order.temp;
-
-import com.food.order.error.PaymentErrors;
+package com.food.order.error;
 
 public class NotFoundPaymentException extends RuntimeException {
     private static final PaymentErrors ERROR = PaymentErrors.NOT_FOUND_PAYMENT;
