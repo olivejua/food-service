@@ -26,9 +26,9 @@ import java.util.Optional;
 @Service
 public class DefaultPayService implements PayService {
     private final OrderCommonService orderCommonService;
-    private final PointService pointService;
     private final PaymentCommonService paymentCommonService;
     private final PaymentLogCommonService paymentLogCommonService;
+    private final PointService pointService;
 
     public Long pay(final PayRequest payment) {
         OrderDto order = orderCommonService.findById(payment.getOrderId())
