@@ -10,13 +10,13 @@ import com.food.order.error.PaymentErrors;
 import com.food.order.mock.MockOrder;
 import com.food.order.mock.MockPayment;
 import com.food.order.mock.MockRequestUser;
-import com.food.order.presentation.dto.request.PaymentDoRequest;
+import com.food.common.payment.business.external.model.PaymentDoRequest;
 import com.food.order.stubrepository.StubOrderService;
 import com.food.order.stubrepository.StubPaymentLogService;
 import com.food.order.stubrepository.StubPaymentService;
 import com.food.order.stubrepository.StubPointService;
 import com.food.order.temp.DefaultPayService;
-import com.food.order.temp.PayService;
+import com.food.common.payment.business.external.PayService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

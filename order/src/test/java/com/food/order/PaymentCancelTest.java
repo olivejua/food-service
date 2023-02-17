@@ -13,7 +13,7 @@ import com.food.order.stubrepository.StubPointService;
 import com.food.order.temp.DefaultPayService;
 import com.food.order.error.InvalidPaymentActionTypeException;
 import com.food.order.error.NotFoundPaymentException;
-import com.food.order.temp.PayService;
+import com.food.common.payment.business.external.PayService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
