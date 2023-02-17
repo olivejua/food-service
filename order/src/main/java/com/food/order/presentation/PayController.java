@@ -4,14 +4,13 @@ import com.food.common.annotation.ApiFor;
 import com.food.common.annotation.Authenticated;
 import com.food.common.apiResult.SuccessResult;
 import com.food.common.payment.business.external.PayService;
+import com.food.common.payment.business.external.model.PaymentDoRequest;
 import com.food.common.user.business.external.model.RequestUser;
 import com.food.common.user.enumeration.Role;
-import com.food.order.presentation.dto.request.PayViewRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 @ApiFor(roles = Role.CUSTOMER)
@@ -22,17 +21,17 @@ public class PayController {
     private final PayService payService;
 
     @PostMapping
-    public ResponseEntity<SuccessResult> pay(@RequestBody @Valid PayViewRequest request,
-                                             @Authenticated RequestUser requestUser) {
-        payService.pay(request.toPayRequest(requestUser));
+    public ResponseEntity<SuccessResult<Void>> pay(@RequestBody PaymentDoRequest request,
+                                                   @Authenticated RequestUser requestUser) {
+        payService.pay(request, requestUser);
 
         return ResponseEntity.ok(SuccessResult.createResult());
     }
 
     @DeleteMapping("/{paymentId}")
-    public ResponseEntity<SuccessResult> cancelPayment(@PathVariable @NotNull Long paymentId,
-                                             @Authenticated RequestUser requestUser) {
-        payService.cancelPayment(paymentId, requestUser);
+    public ResponseEntity<SuccessResult<Void>> cancelPayment(@PathVariable @NotNull Long paymentId,
+                                                             @Authenticated RequestUser requestUser) {
+        payService.cancel(paymentId, requestUser);
 
         return ResponseEntity.ok(SuccessResult.createResult());
     }
