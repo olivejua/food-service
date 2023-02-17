@@ -1,7 +1,9 @@
 package com.food.order.temp;
 
+import com.food.order.error.PaymentErrors;
 import com.food.common.order.business.internal.OrderCommonService;
 import com.food.common.order.business.internal.dto.OrderDto;
+import com.food.common.payment.business.external.PayService;
 import com.food.common.payment.business.external.model.payrequest.PaymentElement;
 import com.food.common.payment.business.external.model.payrequest.PointPayment;
 import com.food.common.payment.business.internal.PaymentCommonService;
@@ -15,7 +17,7 @@ import com.food.common.user.business.external.model.PointCollectRequest;
 import com.food.common.user.business.external.model.PointUseRequest;
 import com.food.common.user.business.external.model.RequestUser;
 import com.food.order.error.*;
-import com.food.order.presentation.dto.request.PaymentDoRequest;
+import com.food.common.payment.business.external.model.PaymentDoRequest;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
