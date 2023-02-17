@@ -1,7 +1,7 @@
-package com.food.order.temp;
+package com.food.common.payment.business.external;
 
+import com.food.common.payment.business.external.model.PaymentDoRequest;
 import com.food.common.user.business.external.model.RequestUser;
-import com.food.order.presentation.dto.request.PaymentDoRequest;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
