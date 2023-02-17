@@ -10,7 +10,7 @@ import com.food.order.stubrepository.StubOrderService;
 import com.food.order.stubrepository.StubPaymentLogService;
 import com.food.order.stubrepository.StubPaymentService;
 import com.food.order.stubrepository.StubPointService;
-import com.food.order.temp.DefaultPayService;
+import com.food.order.business.DefaultPayService;
 import com.food.order.error.InvalidPaymentActionTypeException;
 import com.food.order.error.NotFoundPaymentException;
 import com.food.common.payment.business.external.PayService;
