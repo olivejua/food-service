@@ -26,14 +26,6 @@ import static com.food.common.payment.enumeration.PaymentMethod.POINT;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PaymentCancelTest {
-    /**
-     * 요청정보인 PaymentId의 결제정보가 존재해야한다. (v)
-     * 결제 정보의 ActionType이 '취소'이면 취소처리에 실패한다. (v)
-     * 결제 정보의 상태를 '취소'로 변경한다. (v)
-     * 포인트 사용 금액이 있다면 재적립한다. (v)
-     * 포인트 적립 금액이 있다면 회수한다. (v)
-     */
-
     private PayService payService;
     private StubOrderService stubOrderService;
     private StubPaymentService stubPaymentService;
