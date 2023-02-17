@@ -1,7 +1,7 @@
-package com.food.order.presentation.dto.request;
+package com.food.common.payment.business.external.model;
 
+import com.food.common.error.exception.InvalidRequestParameterException;
 import com.food.common.payment.enumeration.PaymentMethod;
-import com.food.order.error.InvalidPaymentDoParameterException;
 import lombok.Getter;
 
 import java.util.*;
@@ -23,15 +23,15 @@ public class PaymentDoRequest {
 
     private void validate() {
         if (orderId == null) {
-            throw new InvalidPaymentDoParameterException("주문정보가 비어있습니다.");
+            throw new InvalidRequestParameterException("주문정보가 비어있습니다.");
         }
 
         if (items.isEmpty()) {
-            throw new InvalidPaymentDoParameterException("결제정보가 비어있습니다.");
+            throw new InvalidRequestParameterException("결제정보가 비어있습니다.");
         }
 
         if (isItemsWithDuplicatedMethods()) {
-            throw new InvalidPaymentDoParameterException("중복된 결제수단은 존재할 수 없습니다.");
+            throw new InvalidRequestParameterException("중복된 결제수단은 존재할 수 없습니다.");
         }
     }
 
@@ -74,15 +74,15 @@ public class PaymentDoRequest {
 
         private void validate() {
             if (amount == null) {
-                throw new InvalidPaymentDoParameterException("결제금액이 비어있습니다.");
+                throw new InvalidRequestParameterException("결제금액이 비어있습니다.");
             }
 
             if (method == null) {
-                throw new InvalidPaymentDoParameterException("결제수단이 비어있습니다.");
+                throw new InvalidRequestParameterException("결제수단이 비어있습니다.");
             }
 
             if (amount < 0) {
-                throw new InvalidPaymentDoParameterException("결제금액은 양수여야 합니다.");
+                throw new InvalidRequestParameterException("결제금액은 양수여야 합니다.");
             }
         }
     }

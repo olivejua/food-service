@@ -1,9 +1,10 @@
 package com.food.order.business;
 
+import com.food.order.error.PaymentErrors;
 import com.food.common.order.business.internal.OrderCommonService;
 import com.food.common.order.business.internal.dto.OrderDto;
 import com.food.common.payment.business.external.PayService;
-import com.food.common.payment.business.external.model.PayRequest;
+import com.food.common.payment.business.external.model.payrequest.PaymentElement;
 import com.food.common.payment.business.external.model.payrequest.PointPayment;
 import com.food.common.payment.business.internal.PaymentCommonService;
 import com.food.common.payment.business.internal.PaymentLogCommonService;
@@ -13,80 +14,115 @@ import com.food.common.payment.enumeration.PaymentActionType;
 import com.food.common.payment.enumeration.PaymentMethod;
 import com.food.common.user.business.external.PointService;
 import com.food.common.user.business.external.model.PointCollectRequest;
+import com.food.common.user.business.external.model.PointUseRequest;
 import com.food.common.user.business.external.model.RequestUser;
+import com.food.order.error.*;
+import com.food.common.payment.business.external.model.PaymentDoRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-@RequiredArgsConstructor
-@Transactional
 @Service
+@RequiredArgsConstructor
 public class DefaultPayService implements PayService {
     private final OrderCommonService orderCommonService;
-    private final PointService pointService;
     private final PaymentCommonService paymentCommonService;
     private final PaymentLogCommonService paymentLogCommonService;
+    private final PointService pointService;
 
-    public Long pay(final PayRequest payment) {
-        OrderDto order = orderCommonService.findById(payment.getOrderId())
-                .orElseThrow(() -> new IllegalArgumentException("주문내역이 존재하지 않습니다. orderId=" + payment.getOrderId()));
+    @Override
+    public Long pay(PaymentDoRequest request, RequestUser requestUser) {
+        OrderDto order = orderCommonService.findById(request.getOrderId())
+                .orElseThrow(() -> new NotFoundOrderException(request.getOrderId()));
 
-        if (payment.hasDifferentTotalAmountAs(order)) {
-            throw new IllegalArgumentException(
-                    String.format("주문금액과 결제금액이 일치하지 않습니다. 주문금액: %d, 결제금액: %d", order.getAmount(), payment.getTotalAmount()));
+        if (!request.hasSameTotalAmountAs(order.getAmount())) {
+            throw new InvalidPaymentException(PaymentErrors.WRONG_PAYMENT_AMOUNT);
         }
 
-        usePoints(payment);
+        if (paymentCommonService.existsById(order.getId())) {
+            throw new DuplicatedPaymentException();
+        }
 
         PaymentDto paymentDto = PaymentDto.builder()
-                .orderId(payment.getOrderId())
-                .actionType(payment.getActionType())
+                .orderId(order.getId())
+                .actionType(PaymentActionType.PAYMENT)
                 .build();
-        Long savedPaymentId = paymentCommonService.save(paymentDto).getId();
-        paymentLogCommonService.saveAll(savedPaymentId, payment.getPayments());
+        Long paymentId = paymentCommonService.save(paymentDto).getId();
 
-        collectPoints(payment, savedPaymentId);
+        Set<PaymentElement> paymentElements = getPaymentElements(request, requestUser);
+        paymentLogCommonService.saveAll(paymentId, paymentElements);
 
-        return savedPaymentId;
+        collectPoint(requestUser, paymentId, paymentElements);
+
+        return paymentId;
     }
 
-    private void usePoints(PayRequest payment) {
-        Optional<PointPayment> findPointPayment = payment.findPointPayment();
-        if(findPointPayment.isPresent()) {
-            PointPayment paymentPoint = findPointPayment.get();
-            Long usedPointId = pointService.use(paymentPoint.toPointsUseRequest(payment.getPayerId()));
-            paymentPoint.updateUsedPointId(usedPointId);
+    private Set<PaymentElement> getPaymentElements(PaymentDoRequest request, RequestUser requestUser) {
+        return request.getItems().stream()
+                .map(item -> {
+                    PaymentElement element = PaymentElement.findPaymentElement(item.getMethod(), item.getAmount());
+                    usePointsIfPaymentMethodIsPoint(requestUser, element);
+
+                    return element;
+                })
+                .collect(Collectors.toSet());
+    }
+
+    private void usePointsIfPaymentMethodIsPoint(RequestUser requestUser, PaymentElement element) {
+        if (element instanceof PointPayment pointPayment) {
+            PointUseRequest pointUseRequest = new PointUseRequest(pointPayment.getAmount(), requestUser.getUserId());
+            pointPayment.updateUsedPointId(pointService.use(pointUseRequest));
         }
     }
 
-    private void collectPoints(PayRequest payment, Long paymentId) {
-        int actualPaymentAmount = payment.getActualPaymentAmount();
-        if (actualPaymentAmount == 0) return;
+    private void collectPoint(RequestUser requestUser, Long paymentId, Set<PaymentElement> paymentElements) {
+        PointCollectRequest collectRequest = new PointCollectRequest(requestUser.getUserId(), paymentId, calculateActualPaymentAmount(paymentElements));
+        pointService.collect(collectRequest);
+    }
 
-        PointCollectRequest request = new PointCollectRequest(payment.getPayerId(), paymentId, actualPaymentAmount);
-        pointService.collect(request);
+    private Integer calculateActualPaymentAmount(Set<PaymentElement> elements) {
+        return elements.stream()
+                .filter(element -> element.method() != PaymentMethod.POINT)
+                .mapToInt(PaymentElement::getAmount)
+                .sum();
     }
 
     @Override
-    public void cancelPayment(Long paymentId, RequestUser requestUser) {
+    public void cancel(Long paymentId, RequestUser requestUser) {
+        PaymentDto payment = paymentCommonService.findById(paymentId)
+                .orElseThrow(() -> new NotFoundPaymentException(paymentId));
+
+        if (payment.isCanceled()) {
+            throw new InvalidPaymentActionTypeException("이미 취소된 주문정보입니다.");
+        }
+
         paymentCommonService.updateActionType(paymentId, PaymentActionType.CANCELLATION);
 
         List<PaymentLogDto> paymentLogs = paymentLogCommonService.findAllByPaymentId(paymentId);
-        Optional<PaymentLogDto> pointPaymentLog = filterPointPaymentLog(paymentLogs);
 
-        pointPaymentLog
-                .ifPresent(paymentLog -> pointService.recollectUsedPoint(paymentLog.getPointId()));
-
-        pointService.retrieveCollectedPoint(paymentId);
+        recollectPointsIfUsedPointsExist(paymentLogs);
+        retrievePointsIfCollectedPointsExist(paymentId, paymentLogs);
     }
 
-    private Optional<PaymentLogDto> filterPointPaymentLog(List<PaymentLogDto> paymentLogs) {
-        return paymentLogs.stream()
-                .filter(log -> log.getMethod() == PaymentMethod.POINT)
-                .findAny();
+    private void recollectPointsIfUsedPointsExist(List<PaymentLogDto> paymentLogs) {
+        paymentLogs
+                .stream()
+                .filter(paymentLog -> paymentLog.getMethod() == PaymentMethod.POINT)
+                .findAny()
+                .ifPresent(pointPayment -> pointService.recollectUsedPoint(pointPayment.getPointId()));
     }
 
+    private void retrievePointsIfCollectedPointsExist(Long paymentId, List<PaymentLogDto> paymentLogs) {
+        int paymentAmount = paymentLogs.stream()
+                .filter(paymentLog -> paymentLog.getMethod() != PaymentMethod.POINT)
+                .mapToInt(PaymentLogDto::getAmount)
+                .sum();
+
+        if (paymentAmount > 0) {
+            pointService.retrieveCollectedPoint(paymentId);
+        }
+    }
 }

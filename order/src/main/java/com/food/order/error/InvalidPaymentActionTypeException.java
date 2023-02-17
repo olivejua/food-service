@@ -1,6 +1,4 @@
-package com.food.order.temp;
-
-import com.food.order.error.PaymentErrors;
+package com.food.order.error;
 
 public class InvalidPaymentActionTypeException extends RuntimeException {
     private static final PaymentErrors ERROR = PaymentErrors.INVALID_ACTION_TYPE;
