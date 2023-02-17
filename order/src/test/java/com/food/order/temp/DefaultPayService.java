@@ -18,7 +18,6 @@ import com.food.order.error.DuplicatedPaymentException;
 import com.food.order.error.InvalidPaymentException;
 import com.food.order.error.NotFoundOrderException;
 import com.food.order.error.PaymentErrors;
-import com.food.order.mock.MockRequestUser;
 import com.food.order.presentation.dto.request.PaymentDoRequest;
 import lombok.RequiredArgsConstructor;
 
@@ -30,7 +29,7 @@ import java.util.stream.Collectors;
 public class DefaultPayService implements PayService {
     private final OrderCommonService orderCommonService;
     private final PaymentCommonService paymentCommonService;
-    private final PaymentLogCommonService paymentLogRepository;
+    private final PaymentLogCommonService paymentLogCommonService;
     private final PointService pointService;
 
     @Override
@@ -53,7 +52,7 @@ public class DefaultPayService implements PayService {
         Long paymentId = paymentCommonService.save(paymentDto).getId();
 
         Set<PaymentElement> paymentElements = getPaymentElements(request, requestUser);
-        paymentLogRepository.saveAll(paymentId, paymentElements);
+        paymentLogCommonService.saveAll(paymentId, paymentElements);
 
         collectPoint(requestUser, paymentId, paymentElements);
 
@@ -91,7 +90,7 @@ public class DefaultPayService implements PayService {
     }
 
     @Override
-    public void cancel(Long paymentId, MockRequestUser mockRequestUser) {
+    public void cancel(Long paymentId, RequestUser requestUser) {
         PaymentDto payment = paymentCommonService.findById(paymentId)
                 .orElseThrow(() -> new NotFoundPaymentException(paymentId));
 
@@ -101,14 +100,21 @@ public class DefaultPayService implements PayService {
 
         paymentCommonService.updateActionType(paymentId, PaymentActionType.CANCELLATION);
 
-        List<PaymentLogDto> paymentLogs = paymentLogRepository.findAllByPaymentId(paymentId);
+        List<PaymentLogDto> paymentLogs = paymentLogCommonService.findAllByPaymentId(paymentId);
 
+        recollectPointsIfUsedPointsExist(paymentLogs);
+        retrievePointsIfCollectedPointsExist(paymentId, paymentLogs);
+    }
+
+    private void recollectPointsIfUsedPointsExist(List<PaymentLogDto> paymentLogs) {
         paymentLogs
                 .stream()
                 .filter(paymentLog -> paymentLog.getMethod() == PaymentMethod.POINT)
                 .findAny()
                 .ifPresent(pointPayment -> pointService.recollectUsedPoint(pointPayment.getPointId()));
+    }
 
+    private void retrievePointsIfCollectedPointsExist(Long paymentId, List<PaymentLogDto> paymentLogs) {
         int paymentAmount = paymentLogs.stream()
                 .filter(paymentLog -> paymentLog.getMethod() != PaymentMethod.POINT)
                 .mapToInt(PaymentLogDto::getAmount)
