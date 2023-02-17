@@ -19,11 +19,13 @@ import com.food.common.user.business.external.model.RequestUser;
 import com.food.order.error.*;
 import com.food.common.payment.business.external.model.PaymentDoRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Service
 @RequiredArgsConstructor
 public class DefaultPayService implements PayService {
     private final OrderCommonService orderCommonService;
