@@ -74,6 +74,6 @@ public class PaymentLog extends BaseTimeEntity {
     }
 
     public Long getPointId() {
-        return point.getId();
+        return point != null ? point.getId() : null;
     }
 }
