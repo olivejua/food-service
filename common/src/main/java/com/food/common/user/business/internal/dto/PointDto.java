@@ -5,20 +5,21 @@ import com.food.common.user.enumeration.PointType;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.util.Assert;
 
 import javax.validation.constraints.NotNull;
 
-import static lombok.AccessLevel.PRIVATE;
+import static lombok.AccessLevel.PROTECTED;
 
-@NoArgsConstructor(access = PRIVATE)
+@NoArgsConstructor(access = PROTECTED)
 @Getter
-public final class PointDto {
-    private Long id;
-    private Long userId;
-    private PointType type;
-    private Integer changedAmount;
-    private Integer currentAmount;
-    private Long paymentId;
+public class PointDto {
+    protected Long id;
+    protected Long userId;
+    protected PointType type;
+    protected Integer changedAmount;
+    protected Integer currentAmount;
+    protected Long paymentId;
 
     public PointDto(@NotNull final Point point) {
         this.id = point.getId();
@@ -29,13 +30,18 @@ public final class PointDto {
         this.paymentId = point.getPaymentId();
     }
 
-    @Builder
-    public PointDto(Long id, Long userId, PointType type, Integer changedAmount, Integer currentAmount, Long paymentId) {
-        this.id = id;
+    @Builder(builderClassName = "SaveBuilder", builderMethodName = "saveBuilder")
+    public PointDto(Long userId, PointType type, Integer changedAmount, Long paymentId) {
+        Assert.notNull(userId, "userId must not be null");
+        Assert.notNull(type, "type must not be null");
+        Assert.notNull(changedAmount, "changedAmount must not be null");
+        Assert.notNull(paymentId, "paymentId must not be null");
+
         this.userId = userId;
         this.type = type;
         this.changedAmount = changedAmount;
-        this.currentAmount = currentAmount;
         this.paymentId = paymentId;
     }
+
+
 }
