@@ -2,6 +2,7 @@ package com.food.common.user.business.internal.dto;
 
 import com.food.common.user.domain.Point;
 import com.food.common.user.enumeration.PointType;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -26,5 +27,15 @@ public final class PointDto {
         this.changedAmount = point.getChangedAmount();
         this.currentAmount = point.getCurrentAmount();
         this.paymentId = point.getPaymentId();
+    }
+
+    @Builder
+    public PointDto(Long id, Long userId, PointType type, Integer changedAmount, Integer currentAmount, Long paymentId) {
+        this.id = id;
+        this.userId = userId;
+        this.type = type;
+        this.changedAmount = changedAmount;
+        this.currentAmount = currentAmount;
+        this.paymentId = paymentId;
     }
 }
