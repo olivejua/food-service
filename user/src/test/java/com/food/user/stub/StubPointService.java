@@ -3,6 +3,7 @@ package com.food.user.stub;
 import com.food.common.user.business.internal.PointCommonService;
 import com.food.common.user.business.internal.dto.PointDto;
 import com.food.common.user.business.internal.dto.PointSaveDto;
+import com.food.user.mock.MockPoint;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,7 +25,7 @@ public class StubPointService implements PointCommonService {
             return point;
         }
 
-        PointDto newOne = PointDto.builder()
+        PointDto newOne = MockPoint.testBuilder()
                 .id(autoIncrementKey--)
                 .userId(point.getUserId())
                 .type(point.getType())
