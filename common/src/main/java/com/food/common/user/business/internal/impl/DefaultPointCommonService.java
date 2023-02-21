@@ -25,6 +25,15 @@ public class DefaultPointCommonService implements PointCommonService {
     private final PaymentEntityService paymentEntityService;
 
     @Override
+    public PointDto save(PointDto request) {
+        User user = userEntityService.findById(request.getUserId());
+        Payment payment = paymentEntityService.findById(request.getPaymentId());
+
+        Point entity = Point.create(user, request.getType(), request.getChangedAmount(), request.getCurrentAmount(), payment);
+        return new PointDto(pointRepository.save(entity));
+    }
+
+    @Override
     public Optional<PointDto> findLatestPointByUserId(Long userId) {
         Optional<Point> optionalPoint = findLatestPointByUser(findUser(userId));
 
