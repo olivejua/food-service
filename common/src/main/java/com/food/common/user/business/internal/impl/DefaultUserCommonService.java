@@ -6,6 +6,7 @@ import com.food.common.user.business.internal.UserCommonService;
 import com.food.common.user.business.internal.dto.UserDto;
 import com.food.common.user.domain.User;
 import com.food.common.user.enumeration.Role;
+import com.food.common.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,10 +19,16 @@ import java.util.Optional;
 public class DefaultUserCommonService implements UserCommonService {
     private final UserEntityService userEntityService;
     private final StoreOwnerEntityService storeOwnerService;
+    private final UserRepository userRepository;
 
-    public UserDto findById(Long id) {
-        User user = userEntityService.findById(id);
-        return new UserDto(user);
+    @Override
+    public boolean existsById(Long userId) {
+        return userRepository.existsById(userId);
+    }
+
+    public Optional<UserDto> findById(Long id) {
+        return userRepository.findById(id)
+                .map(UserDto::new);
     }
 
     public Role findRoleById(Long id) {

@@ -8,8 +8,14 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PointCommonService {
-    Optional<PointDto> findLatestPointByUserId(@NotNull Long userId);
+    /**
+     * 포인트 데이터를 저장하고, 새로운 ID가 부여된 Dto 객체를 리턴한다.
+     * @param pointDto 저장될 포인트 데이터. null일 수 없다.
+     * @return 저장된 포인트 데이터가 담긴 Dto 객체
+     */
+    PointDto save(@NotNull PointDto pointDto);
 
+    Optional<PointDto> findLatestPointByUserId(@NotNull Long userId);
     Long save(@NotNull PointSaveDto request);
 
     Optional<PointDto> findByPointId(@NotNull Long pointId);
