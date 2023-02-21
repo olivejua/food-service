@@ -1,4 +1,4 @@
-package com.food.user.stub;
+package com.food.user.error;
 
 import com.food.common.error.ApplicationErrors;
 

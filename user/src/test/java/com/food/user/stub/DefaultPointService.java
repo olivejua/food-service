@@ -5,6 +5,7 @@ import com.food.common.user.business.internal.UserCommonService;
 import com.food.common.user.business.internal.dto.PointDto;
 import com.food.common.user.business.internal.dto.UserDto;
 import com.food.user.PointCollectRequest;
+import com.food.user.error.NotFoundPointOwnerException;
 import org.springframework.validation.annotation.Validated;
 
 @Validated

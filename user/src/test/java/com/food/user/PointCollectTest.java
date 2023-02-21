@@ -2,6 +2,7 @@ package com.food.user;
 
 import com.food.common.error.exception.InvalidRequestParameterException;
 import com.food.common.user.business.internal.dto.UserDto;
+import com.food.user.error.NotFoundPointOwnerException;
 import com.food.user.mock.MockUser;
 import com.food.user.stub.*;
 import org.junit.jupiter.api.BeforeEach;
