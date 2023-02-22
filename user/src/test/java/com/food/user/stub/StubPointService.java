@@ -25,7 +25,7 @@ public class StubPointService implements PointCommonService {
             return point;
         }
 
-        PointDto newOne = MockPoint.testBuilder()
+        MockPoint newOne = MockPoint.testBuilder()
                 .id(autoIncrementKey--)
                 .userId(point.getUserId())
                 .type(point.getType())
@@ -33,6 +33,8 @@ public class StubPointService implements PointCommonService {
                 .currentAmount(point.getCurrentAmount())
                 .paymentId(point.getPaymentId())
                 .build();
+        newOne.updateCreatedDate();
+
         data.put(newOne.getId(), newOne);
 
         return newOne;
@@ -40,7 +42,21 @@ public class StubPointService implements PointCommonService {
 
     @Override
     public Optional<PointDto> findLatestPointByUserId(Long userId) {
-        return Optional.empty();
+        PointDto latestPoint = null;
+
+        for (PointDto eachPoint : data.values()) {
+            if (eachPoint.getUserId().equals(userId) && hasMoreRecentCreatedDateThan(eachPoint, latestPoint)) {
+                latestPoint = eachPoint;
+            }
+        }
+
+        return Optional.ofNullable(latestPoint);
+    }
+
+    private boolean hasMoreRecentCreatedDateThan(PointDto targetPoint, PointDto compared) {
+        if (compared == null) return true;
+
+        return targetPoint.getCreatedDate().isAfter(compared.getCreatedDate());
     }
 
     @Override
@@ -50,7 +66,7 @@ public class StubPointService implements PointCommonService {
 
     @Override
     public Optional<PointDto> findByPointId(Long pointId) {
-        return Optional.empty();
+        return Optional.ofNullable(data.get(pointId));
     }
 
     @Override

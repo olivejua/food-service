@@ -21,6 +21,7 @@ public class PointDto {
     protected Amount changedAmount;
     protected Amount currentAmount;
     protected Long paymentId;
+    protected LocalDateTime createdDate;
 
     public PointDto(@NotNull final Point point) {
         this.id = point.getId();
@@ -29,6 +30,7 @@ public class PointDto {
         this.changedAmount = point.getChangedAmount();
         this.currentAmount = point.getCurrentAmount();
         this.paymentId = point.getPaymentId();
+        this.createdDate = point.getCreatedDate();
     }
 
     public static PointDto createBasePoint(@NotNull Long userId) {
@@ -45,6 +47,17 @@ public class PointDto {
         point.type = PointType.COLLECT;
         point.changedAmount = collectAmount;
         point.currentAmount = this.currentAmount.plus(collectAmount);
+        point.paymentId = paymentId;
+
+        return point;
+    }
+
+    public PointDto use(UsedPoints usedAmount) {
+        PointDto point = new PointDto();
+        point.userId = userId;
+        point.type = PointType.COLLECT;
+        point.changedAmount = usedAmount;
+        point.currentAmount = this.currentAmount.subtract(usedAmount);
         point.paymentId = paymentId;
 
         return point;
