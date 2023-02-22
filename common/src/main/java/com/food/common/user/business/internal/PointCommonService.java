@@ -15,9 +15,20 @@ public interface PointCommonService {
      */
     PointDto save(@NotNull PointDto pointDto);
 
+    /**
+     * 주어진 소유자의 가장 최근 포인트데이터를 리턴한다.
+     * @param userId 소유자 ID
+     * @return 주어진 소유자 ID를 보유한 가장 최근 포인트 데이터 또는 찾을 수 없는 경우 Optional#empty()
+     */
     Optional<PointDto> findLatestPointByUserId(@NotNull Long userId);
+
     Long save(@NotNull PointSaveDto request);
 
+    /**
+     * ID로 포인트데이터를 리턴한다.
+     * @param pointId 포인트 ID. null일 수 없다.
+     * @return 주어진 ID를 보유한 포인트데이터 또는 찾을 수 없는 경우 Optional#empty()
+     */
     Optional<PointDto> findByPointId(@NotNull Long pointId);
 
     /**
