@@ -1,7 +1,6 @@
 package com.food.common.payment.business.external.model.payrequest;
 
 import com.food.common.payment.enumeration.PaymentMethod;
-import com.food.common.user.business.external.model.PointUseRequest;
 
 import javax.validation.constraints.NotNull;
 import java.util.Optional;
@@ -15,13 +14,6 @@ public final class PointPayment extends PaymentElement {
 
     public void updateUsedPointId(@NotNull Long pointId) {
         this.pointId = pointId;
-    }
-
-    public PointUseRequest toPointsUseRequest(Long ownerId) {
-        return PointUseRequest.builder()
-                .ownerId(ownerId)
-                .amount(amount)
-                .build();
     }
 
     @Override

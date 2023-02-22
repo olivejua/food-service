@@ -1,84 +1,44 @@
 package com.food.user;
 
-import com.food.common.error.exception.InvalidRequestParameterException;
+import com.food.common.user.business.internal.dto.PointDto;
 import com.food.common.user.business.internal.dto.UserDto;
+import com.food.common.utils.Amount;
 import com.food.user.error.NotFoundPointOwnerException;
+import com.food.user.mock.MockRequestUser;
 import com.food.user.mock.MockUser;
 import com.food.user.stub.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PointCollectTest {
     /**
      * [적립]
-     * 적립 금액은 0 이상이고, 10원단위여야 한다. (v)
+     *
+     * 포인트 사용금액을 제외한 실제 결제금액의 5%를 적립한다. 1번째 자리수는 내림처리한다.
+     * 적립 금액은 0 이상이고, 10원단위여야 한다. (v) -> 제거
      * 적립 대상자가 존재하지 않으면 예외가 발생한다. (v)
      * 결제 ID는 존재해야한다. (v)
-     * 포인트 적립 데이터를 저장한다.
-     *
-     * [사용]
-     * 사용 대상자가 존재하지 않으면 예외가 발생한다.
-     * 포인트 잔액이 사용 포인트보다 부족하면 예외가 발생한다.
-     * 사용포인트는 0이상이고, 10원단위여야 한다.
-     * 잔액포인트를 차감한다.
-     *
-     * 재적립
-     *
-     * 회수
+     * 포인트 적립 데이터를 저장한다. -> 추가 (v)
+     * 결제금액의 5%를 적립해준다. 적립금액이 소수점이라면 내림처리한다. (사용자의 포인트 잔여금액이 그만큼 늘었는지 확인) -> 추가 (v)
      */
 
     private StubUserService stubUserService;
     private StubPointService stubPointService;
+    private StubPaymentAmountService paymentAmountService;
     private PointService pointService;
+    private MockRequestUser mockRequestUser;
 
     @BeforeEach
     void setup() {
         stubUserService = new StubUserService();
         stubPointService = new StubPointService();
-        pointService = new DefaultPointService(stubUserService, stubPointService);
-    }
-
-    @Test
-    void 포인트_적립_금액은_0원_이상이어야한다() {
-        //given
-        int collectedAmount1 = 0;
-
-        //when & then
-        InvalidRequestParameterException error1 = assertThrows(InvalidRequestParameterException.class,
-                () -> new PointCollectRequest(1L, collectedAmount1, 1L));
-
-        assertTrue(error1.getMessage().contains("포인트 적립금액은 0이상의 금액이어야 합니다."));
-
-        //given
-        int collectedAmount2 = 1_000;
-
-        //when & then
-        assertDoesNotThrow(() -> new PointCollectRequest(1L, collectedAmount2, 1L));
-
-        int collectedAmount3 = -1_000;
-        assertThrows(InvalidRequestParameterException.class,
-                () -> new PointCollectRequest(1L, collectedAmount3, 1L));
-    }
-
-    @Test
-    void 포인트_적립금액이_10원_단위여야_한다() {
-        //given
-        int collectedAmount1 = 1_111;
-
-        //when
-        InvalidRequestParameterException error1 = assertThrows(InvalidRequestParameterException.class,
-                () -> new PointCollectRequest(1L, collectedAmount1, 1L));
-
-        //then
-        assertTrue(error1.getMessage().contains("포인트 적립금액은 10원 단위의 금액이어야 합니다."));
-
-        //given
-        int collectedAmount2 = 1_110;
-
-        //when & then
-        assertDoesNotThrow(() -> new PointCollectRequest(1L, collectedAmount2, 1L));
+        paymentAmountService = new StubPaymentAmountService();
+        pointService = new DefaultPointService(stubUserService, stubPointService, paymentAmountService);
+        mockRequestUser = new MockRequestUser(givenOwnerIdPresent());
     }
 
     private Long givenOwnerIdNotPresent() {
@@ -98,42 +58,61 @@ public class PointCollectTest {
     }
 
     @Test
-    void 요청데이터로_결제ID는_null이면_예외가_발생한다() {
-        //when & then
-        InvalidRequestParameterException error = assertThrows(InvalidRequestParameterException.class,
-                () -> new PointCollectRequest(givenOwnerIdPresent(), 1_000, null));
-
-        assertTrue(error.getMessage().contains("PaymentId는 비어있을 수 없습니다."));
-
-        //given & when & then
-        assertDoesNotThrow(() -> new PointCollectRequest(givenOwnerIdPresent(), 1_000, 1L));
-    }
-
-    @Test
     void 포인트_적립_대상자가_존재하지_않으면_예외가_발생한다() {
         //given
-        PointCollectRequest request1 = new PointCollectRequest(givenOwnerIdNotPresent(), 1_000, 1L);
+        mockRequestUser = new MockRequestUser(givenOwnerIdNotPresent());
 
         //when & then
-        NotFoundPointOwnerException error = assertThrows(NotFoundPointOwnerException.class, () -> pointService.collect(request1));
-        assertTrue(error.getMessage().contains("ownerId=" + request1.getOwnerId()));
-
-        //given
-        PointCollectRequest request2 = new PointCollectRequest(givenOwnerIdPresent(), 1_000, 1L);
-
-        //when & then
-        assertDoesNotThrow(() -> pointService.collect(request2));
+        NotFoundPointOwnerException error = assertThrows(NotFoundPointOwnerException.class, () -> pointService.collect(1L, mockRequestUser));
+        assertTrue(error.getMessage().contains("ownerId=" + mockRequestUser.getUserId()));
     }
 
     @Test
-    void 포인트_적립_요청하면_포인트데이터가_저장함수를_호출한다() {
+    void 결제금액의_5퍼센트를_포인트_적립한다() {
         //given
-        PointCollectRequest request = new PointCollectRequest(givenOwnerIdPresent(), 1_000, 1L);
+        Amount givenAmount = Amount.won(25_000);
+        paymentAmountService.remember(givenAmount);
+
+        Long givenOwnerId = givenOwnerIdPresent();
+
+        Amount expectedChangedAmount = givenAmount.multiply(0.05f);
+        Amount expectedCurrentAmount = currentAmount(givenOwnerId).plus(expectedChangedAmount);
 
         //when
-        pointService.collect(request);
+        pointService.collect(1L, new MockRequestUser(givenOwnerId));
 
         //then
+        Optional<PointDto> findPoint = stubPointService.findLatestPointByUserId(givenOwnerId);
+        assertTrue(findPoint.isPresent());
+        PointDto actualPoint = findPoint.get();
+        assertEquals(expectedChangedAmount, actualPoint.getChangedAmount());
+        assertEquals(expectedCurrentAmount, actualPoint.getCurrentAmount());
+
         assertTrue(stubPointService.isCalledToSave());
+    }
+
+    @Test
+    void 적립금액에서_소수점이_발생한다면_내림처리하여_적립한다() {
+        //given
+        Amount givenAmount = Amount.won(30_550);
+        paymentAmountService.remember(givenAmount);
+
+        Long givenOwnerId = givenOwnerIdPresent();
+
+        //when
+        pointService.collect(1L, new MockRequestUser(givenOwnerId));
+
+        //then
+        Optional<PointDto> findPoint = stubPointService.findLatestPointByUserId(givenOwnerId);
+        assertTrue(findPoint.isPresent());
+        PointDto actualPoint = findPoint.get();
+        assertEquals(Amount.won(1527), actualPoint.getChangedAmount());
+
+    }
+
+    private Amount currentAmount(Long ownerId) {
+        return stubPointService.findLatestPointByUserId(ownerId)
+                .map(PointDto::getChangedAmount)
+                .orElse(Amount.zero());
     }
 }

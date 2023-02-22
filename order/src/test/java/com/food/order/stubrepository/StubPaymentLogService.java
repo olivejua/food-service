@@ -46,6 +46,12 @@ public class StubPaymentLogService implements PaymentLogCommonService {
         }
     }
 
+    public void saveAll(PaymentLogDto... paymentLogs) {
+        for (PaymentLogDto paymentLog : paymentLogs) {
+            save(paymentLog);
+        }
+    }
+
     @Override
     public List<PaymentLogDto> findAllByPaymentId(Long paymentId) {
         return data.values().stream()
