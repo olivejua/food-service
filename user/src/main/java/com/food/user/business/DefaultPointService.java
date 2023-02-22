@@ -7,6 +7,7 @@ import com.food.common.user.business.internal.PointCommonService;
 import com.food.common.user.business.internal.dto.PointDto;
 import com.food.common.user.business.internal.dto.PointSaveDto;
 import com.food.common.user.enumeration.PointType;
+import com.food.common.utils.Amount;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +24,7 @@ public class DefaultPointService implements PointService {
 
     @Override
     public Long use(PointUseRequest request) {
-        int currentAmount = currentAmount(request.getOwnerId());
+        Amount currentAmount = currentAmount(request.getOwnerId());
         if (request.hasGreaterAmountThan(currentAmount)) {
             throw new IllegalArgumentException("잔여포인트가 부족합니다. 잔여포인트=" + currentAmount);
         }
@@ -46,7 +47,7 @@ public class DefaultPointService implements PointService {
         PointDto point = optionalPoint.get();
         PointSaveDto request = PointSaveDto.builder()
                 .usedId(point.getUserId())
-                .amount(point.getChangedAmount())
+                .amount(point.getChangedAmount().getValue())
                 .type(PointType.RECOLLECT)
                 .paymentId(point.getPaymentId())
                 .build();
@@ -61,7 +62,7 @@ public class DefaultPointService implements PointService {
 
         PointSaveDto request = PointSaveDto.builder()
                 .usedId(point.getUserId())
-                .amount(point.getChangedAmount())
+                .amount(point.getChangedAmount().getValue())
                 .type(PointType.RETRIEVE)
                 .paymentId(paymentId)
                 .build();
@@ -87,8 +88,9 @@ public class DefaultPointService implements PointService {
         return (int) Math.ceil(paymentAmount * accumulationRate);
     }
 
-    private int currentAmount(@NotNull Long userId) {
-        Optional<PointDto> point = pointCommonService.findLatestPointByUserId(userId);
-        return point.isPresent() ? point.get().getCurrentAmount() : 0;
+    private Amount currentAmount(@NotNull Long userId) {
+        return pointCommonService.findLatestPointByUserId(userId)
+                .map(PointDto::getCurrentAmount)
+                .orElse(Amount.zero());
     }
 }
