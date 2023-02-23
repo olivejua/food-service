@@ -1,15 +1,19 @@
 package com.food.user;
 
+import com.food.common.user.business.external.PointService;
 import com.food.common.user.business.internal.dto.PointDto;
 import com.food.common.user.business.internal.dto.UserDto;
 import com.food.common.utils.Amount;
 import com.food.common.utils.UsedPoints;
+import com.food.user.business.DefaultPointService;
 import com.food.user.error.InsufficientPointBalanceException;
 import com.food.user.error.NotFoundPointOwnerException;
 import com.food.user.mock.MockPoint;
 import com.food.user.mock.MockRequestUser;
 import com.food.user.mock.MockUser;
-import com.food.user.stub.*;
+import com.food.user.stub.StubPaymentAmountService;
+import com.food.user.stub.StubPointService;
+import com.food.user.stub.StubUserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
