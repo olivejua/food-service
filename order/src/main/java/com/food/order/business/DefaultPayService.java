@@ -1,10 +1,9 @@
 package com.food.order.business;
 
-import com.food.common.utils.Amount;
-import com.food.order.error.PaymentErrors;
 import com.food.common.order.business.internal.OrderCommonService;
 import com.food.common.order.business.internal.dto.OrderDto;
 import com.food.common.payment.business.external.PayService;
+import com.food.common.payment.business.external.model.PaymentDoRequest;
 import com.food.common.payment.business.external.model.payrequest.PaymentElement;
 import com.food.common.payment.business.external.model.payrequest.PointPayment;
 import com.food.common.payment.business.internal.PaymentCommonService;
@@ -14,11 +13,9 @@ import com.food.common.payment.business.internal.model.PaymentLogDto;
 import com.food.common.payment.enumeration.PaymentActionType;
 import com.food.common.payment.enumeration.PaymentMethod;
 import com.food.common.user.business.external.PointService;
-import com.food.common.user.business.external.model.PointCollectRequest;
-import com.food.common.user.business.external.model.PointUseRequest;
 import com.food.common.user.business.external.model.RequestUser;
+import com.food.common.utils.UsedPoints;
 import com.food.order.error.*;
-import com.food.common.payment.business.external.model.PaymentDoRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -74,21 +71,12 @@ public class DefaultPayService implements PayService {
 
     private void usePointsIfPaymentMethodIsPoint(RequestUser requestUser, PaymentElement element) {
         if (element instanceof PointPayment pointPayment) {
-            PointUseRequest pointUseRequest = new PointUseRequest(Amount.won(pointPayment.getAmount()), requestUser.getUserId());
-            pointPayment.updateUsedPointId(pointService.use(pointUseRequest));
+            pointPayment.updateUsedPointId(pointService.use(UsedPoints.won(pointPayment.getAmount()), requestUser));
         }
     }
 
     private void collectPoint(RequestUser requestUser, Long paymentId, Set<PaymentElement> paymentElements) {
-        PointCollectRequest collectRequest = new PointCollectRequest(requestUser.getUserId(), paymentId, calculateActualPaymentAmount(paymentElements));
-        pointService.collect(collectRequest);
-    }
-
-    private Integer calculateActualPaymentAmount(Set<PaymentElement> elements) {
-        return elements.stream()
-                .filter(element -> element.method() != PaymentMethod.POINT)
-                .mapToInt(PaymentElement::getAmount)
-                .sum();
+        pointService.collect(paymentId, requestUser);
     }
 
     @Override

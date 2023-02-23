@@ -1,8 +1,8 @@
 package com.food.order.stubrepository;
 
 import com.food.common.user.business.external.PointService;
-import com.food.common.user.business.external.model.PointCollectRequest;
-import com.food.common.user.business.external.model.PointUseRequest;
+import com.food.common.user.business.external.model.RequestUser;
+import com.food.common.utils.UsedPoints;
 
 public class StubPointService implements PointService {
     private boolean calledToUsePoints = false;
@@ -10,7 +10,6 @@ public class StubPointService implements PointService {
     private boolean calledToRecollectPoints = false;
     private boolean calledToRetrievePoints = false;
     private Long autoIncrementKey = -1L;
-    private Integer collectedAmount;
 
     public boolean isCalledToCollect() {
         return calledToCollectPoints;
@@ -28,21 +27,17 @@ public class StubPointService implements PointService {
         return calledToRetrievePoints;
     }
 
-    public Integer getCollectedAmount() {
-        return collectedAmount;
+    @Override
+    public void collect(Long paymentId, RequestUser requestUser) {
+        calledToCollectPoints = true;
+
     }
 
     @Override
-    public Long use(PointUseRequest request) {
+    public Long use(UsedPoints amount, RequestUser requestUser) {
         calledToUsePoints = true;
 
         return autoIncrementKey--;
-    }
-
-    @Override
-    public void collect(PointCollectRequest request) {
-        calledToCollectPoints = true;
-        collectedAmount = request.getPaymentAmount();
     }
 
     @Override
