@@ -31,4 +31,8 @@ public class PaymentLogDto {
         this.amount = amount;
         this.pointId = pointId;
     }
+
+    public boolean hasMethodOfPoint() {
+        return method == PaymentMethod.POINT;
+    }
 }

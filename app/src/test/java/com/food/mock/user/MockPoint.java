@@ -53,7 +53,8 @@ public class MockPoint {
         }
 
         public Point build() {
-            return Point.create(user, type, changedAmount, currentAmount, payment);
+//            return Point.create(user, type, changedAmount, currentAmount, payment);
+            return null;
         }
     }
 }

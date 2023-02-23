@@ -1,5 +1,6 @@
 package com.food.order.business;
 
+import com.food.common.utils.Amount;
 import com.food.order.error.PaymentErrors;
 import com.food.common.order.business.internal.OrderCommonService;
 import com.food.common.order.business.internal.dto.OrderDto;
@@ -73,7 +74,7 @@ public class DefaultPayService implements PayService {
 
     private void usePointsIfPaymentMethodIsPoint(RequestUser requestUser, PaymentElement element) {
         if (element instanceof PointPayment pointPayment) {
-            PointUseRequest pointUseRequest = new PointUseRequest(pointPayment.getAmount(), requestUser.getUserId());
+            PointUseRequest pointUseRequest = new PointUseRequest(Amount.won(pointPayment.getAmount()), requestUser.getUserId());
             pointPayment.updateUsedPointId(pointService.use(pointUseRequest));
         }
     }

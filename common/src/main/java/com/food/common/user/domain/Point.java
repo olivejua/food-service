@@ -3,6 +3,7 @@ package com.food.common.user.domain;
 import com.food.common.basetime.BaseTimeEntity;
 import com.food.common.payment.domain.Payment;
 import com.food.common.user.enumeration.PointType;
+import com.food.common.utils.Amount;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
@@ -53,12 +54,12 @@ public class Point extends BaseTimeEntity {
     @JoinColumn(name = "payment_id")
     private Payment payment;
 
-    public static Point create(User user, PointType type, Integer changedAmount, Integer currentAmount, Payment payment) {
+    public static Point create(User user, PointType type, Amount changedAmount, Amount currentAmount, Payment payment) {
         Point point = new Point();
         point.user = user;
         point.type = type;
-        point.changedAmount = changedAmount;
-        point.currentAmount = currentAmount;
+        point.changedAmount = changedAmount.getValue();
+        point.currentAmount = currentAmount.getValue();
         point.payment = payment;
 
         return point;
@@ -122,5 +123,13 @@ public class Point extends BaseTimeEntity {
         if (payment == null) return null;
 
         return payment.getId();
+    }
+
+    public Amount getChangedAmount() {
+        return Amount.won(changedAmount);
+    }
+
+    public Amount getCurrentAmount() {
+        return Amount.won(currentAmount);
     }
 }
