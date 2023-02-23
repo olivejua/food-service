@@ -8,7 +8,7 @@ import com.food.common.user.business.internal.dto.PointDto;
 import com.food.common.user.business.internal.dto.UserDto;
 import com.food.common.utils.Amount;
 import com.food.common.utils.UsedPoints;
-import com.food.user.InsufficientPointBalanceException;
+import com.food.user.error.InsufficientPointBalanceException;
 import com.food.user.error.NotFoundPointOwnerException;
 
 public class DefaultPointService implements PointService {

@@ -1,4 +1,4 @@
-package com.food.user;
+package com.food.user.error;
 
 import com.food.common.error.ApplicationErrors;
 import com.food.user.error.PointErrors;
