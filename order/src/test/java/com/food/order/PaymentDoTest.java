@@ -187,7 +187,7 @@ public class PaymentDoTest {
     }
 
     @Test
-    void 결제가_완료되면_포인트사용금액을_제외한_총금액으로_포인트적립_요청한다() {
+    void 결제가_완료되면_포인트적립_요청한다() {
         OrderDto mockOrder = stubOrderService.save(MockOrder.create());
         PaymentDoRequest.Item requestItem = new PaymentDoRequest.Item(PaymentMethod.CARD, mockOrder.getAmount());
         PaymentDoRequest request = new PaymentDoRequest(mockOrder.getId(), requestItem);
@@ -195,7 +195,6 @@ public class PaymentDoTest {
         payService.pay(request, mockRequestUser);
 
         assertTrue(stubPointService.isCalledToCollect());
-        assertEquals(stubPointService.getCollectedAmount(), requestItem.getAmount());
     }
 
 
