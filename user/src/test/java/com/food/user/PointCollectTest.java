@@ -19,17 +19,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PointCollectTest {
-    /**
-     * [적립]
-     *
-     * 포인트 사용금액을 제외한 실제 결제금액의 5%를 적립한다. 1번째 자리수는 내림처리한다.
-     * 적립 금액은 0 이상이고, 10원단위여야 한다. (v) -> 제거
-     * 적립 대상자가 존재하지 않으면 예외가 발생한다. (v)
-     * 결제 ID는 존재해야한다. (v)
-     * 포인트 적립 데이터를 저장한다. -> 추가 (v)
-     * 결제금액의 5%를 적립해준다. 적립금액이 소수점이라면 내림처리한다. (사용자의 포인트 잔여금액이 그만큼 늘었는지 확인) -> 추가 (v)
-     */
-
     private StubUserService stubUserService;
     private StubPointService stubPointService;
     private StubPaymentAmountService paymentAmountService;
