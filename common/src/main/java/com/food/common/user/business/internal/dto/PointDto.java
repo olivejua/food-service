@@ -62,4 +62,8 @@ public class PointDto {
 
         return point;
     }
+
+    public boolean hasSameOwnerIdAs(Long pointOwnerId) {
+        return this.userId.equals(pointOwnerId);
+    }
 }

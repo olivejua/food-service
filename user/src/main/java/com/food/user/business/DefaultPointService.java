@@ -9,7 +9,9 @@ import com.food.common.user.business.internal.dto.PointDto;
 import com.food.common.user.business.internal.dto.UserDto;
 import com.food.common.utils.Amount;
 import com.food.common.utils.UsedPoints;
+import com.food.user.error.DoesNotMatchPointOwnerException;
 import com.food.user.error.InsufficientPointBalanceException;
+import com.food.user.error.NotFoundPointException;
 import com.food.user.error.NotFoundPointOwnerException;
 import org.springframework.stereotype.Service;
 
@@ -55,7 +57,14 @@ public class DefaultPointService implements PointService {
     }
 
     @Override
-    public void recollect(Long pointId) {
+    public void recollect(Long pointId, RequestUser requestUser) {
+        PointDto usedPoint = pointCommonService.findByPointId(pointId)
+                .orElseThrow(() -> new NotFoundPointException(pointId));
+
+        if (!usedPoint.hasSameOwnerIdAs(requestUser.getUserId())) {
+            throw new DoesNotMatchPointOwnerException();
+        }
+
 
     }
 

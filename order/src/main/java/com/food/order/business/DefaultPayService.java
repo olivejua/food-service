@@ -92,16 +92,16 @@ public class DefaultPayService implements PayService {
 
         List<PaymentLogDto> paymentLogs = paymentLogCommonService.findAllByPaymentId(paymentId);
 
-        recollectPointsIfUsedPointsExist(paymentLogs);
+        recollectPointsIfUsedPointsExist(paymentLogs, requestUser);
         retrievePointsIfCollectedPointsExist(paymentId, paymentLogs);
     }
 
-    private void recollectPointsIfUsedPointsExist(List<PaymentLogDto> paymentLogs) {
+    private void recollectPointsIfUsedPointsExist(List<PaymentLogDto> paymentLogs, RequestUser requestUser) {
         paymentLogs
                 .stream()
                 .filter(paymentLog -> paymentLog.getMethod() == PaymentMethod.POINT)
                 .findAny()
-                .ifPresent(pointPayment -> pointService.recollect(pointPayment.getPointId()));
+                .ifPresent(pointPayment -> pointService.recollect(pointPayment.getPointId(), requestUser));
     }
 
     private void retrievePointsIfCollectedPointsExist(Long paymentId, List<PaymentLogDto> paymentLogs) {
