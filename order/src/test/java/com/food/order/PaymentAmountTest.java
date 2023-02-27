@@ -36,12 +36,6 @@ public class PaymentAmountTest {
         paymentAmountService = new DefaultPaymentAmountService(stubPaymentService, stubPaymentLogService);
     }
 
-    /**
-     * 요청 ID의 결제데이터는 존재해야한다.
-     * 결제 금액 중 포인트금액만 있다면 0을 리턴한다.
-     * 포인트 금액을 제외한 결제 금액을 리턴한다.
-     */
-
     @Test
     void 요청결제ID의_결제데이터가_존재하지_않으면_예외가_발생한다() {
         assertThrows(NotFoundPaymentException.class, () -> paymentAmountService.sumOfPaymentAmountWithoutPoints(givenPaymentIdNotPresent()));

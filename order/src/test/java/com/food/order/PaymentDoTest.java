@@ -27,23 +27,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PaymentDoTest {
-    /**
-     * 결제하기 기능 요구사항
-     * - 결제 금액, 결제수단과 함께 통보한다.
-     * - 결제 금액과 결제수단은 필수값이다. (v)
-     * - 결제 시 두개 이상의 결제 수단으로 요청할 수 있다. (포인트, 카드, 계좌이체) (v)
-     * - DB에 결제요청한 주문서가 존재해야한다 (MSG: 유효하지 않은 주문서입니다.) (v)
-     * - 주문서의 금액과 총 결제금액이 일치해야한다. (MSG: 잘못된 결제금액입니다.) (v)
-     * - 중복 결제내역이 있으면 안된다. (v)
-     * - 결제수단에 포인트가 존재하면 잔여포인트를 차감한다. (잔여포인트가 충분해야한다. MSG: 잔여포인트가 부족합니다.) (point service 호출)
-     * - DB에 결제 내역과 로그가 저장되어야한다. (v)
-     * - 결제가 완료되면 주문 상태가 변경된다. (order service 호출)
-     * - 결제가 완료되면 포인트가 적립된다. (point service 호출) (v)
-     *
-     * - 구조 리팩토링한다. (v)
-     * - service 기능구현 완료하면 주석 작성한다. (v)
-     * - 리팩토링시 EntityDto와 Entity명칭 좀 더 상징적인 것으로 변경한다.
-     */
 
     private PayService payService;
     private StubOrderService stubOrderService;
