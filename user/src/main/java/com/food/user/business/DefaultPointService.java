@@ -55,7 +55,7 @@ public class DefaultPointService implements PointService {
     }
 
     @Override
-    public void recollectUsedPoint(Long pointId) {
+    public void recollect(Long pointId) {
 
     }
 

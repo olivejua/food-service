@@ -23,7 +23,7 @@ public interface PointService {
      */
     Long use(@NotNull UsedPoints amount, @NotNull RequestUser requestUser);
 
-    void recollectUsedPoint(@NotNull Long pointId);
+    void recollect(@NotNull Long pointId);
 
     void retrieveCollectedPoint(@NotNull Long paymentId);
 }

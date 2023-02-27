@@ -101,7 +101,7 @@ public class DefaultPayService implements PayService {
                 .stream()
                 .filter(paymentLog -> paymentLog.getMethod() == PaymentMethod.POINT)
                 .findAny()
-                .ifPresent(pointPayment -> pointService.recollectUsedPoint(pointPayment.getPointId()));
+                .ifPresent(pointPayment -> pointService.recollect(pointPayment.getPointId()));
     }
 
     private void retrievePointsIfCollectedPointsExist(Long paymentId, List<PaymentLogDto> paymentLogs) {
