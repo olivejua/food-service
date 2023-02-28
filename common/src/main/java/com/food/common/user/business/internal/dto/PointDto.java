@@ -52,12 +52,23 @@ public class PointDto {
         return point;
     }
 
-    public PointDto use(UsedPoints usedAmount) {
+    public PointDto use(@NotNull UsedPoints usedAmount) {
         PointDto point = new PointDto();
         point.userId = userId;
         point.type = PointType.COLLECT;
         point.changedAmount = usedAmount;
         point.currentAmount = this.currentAmount.subtract(usedAmount);
+        point.paymentId = paymentId;
+
+        return point;
+    }
+
+    public PointDto recollect(@NotNull Amount recollectAmount) {
+        PointDto point = new PointDto();
+        point.userId = userId;
+        point.type = PointType.RECOLLECT;
+        point.changedAmount = recollectAmount;
+        point.currentAmount = this.currentAmount.plus(recollectAmount);
         point.paymentId = paymentId;
 
         return point;

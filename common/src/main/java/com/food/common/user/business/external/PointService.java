@@ -28,7 +28,7 @@ public interface PointService {
      * @param pointId 사용포인트 ID
      * @param requestUser 포인트 재적립 대상 소유자. 현재 로그인한 유저가 포인트 재적립 대상이 된다.
      */
-    void recollect(@NotNull Long pointId, @NotNull RequestUser requestUser);
+    Long recollect(@NotNull Long pointId, @NotNull RequestUser requestUser);
 
     void retrieveCollectedPoint(@NotNull Long paymentId);
 }

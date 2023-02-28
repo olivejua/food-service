@@ -57,7 +57,7 @@ public class DefaultPointService implements PointService {
     }
 
     @Override
-    public void recollect(Long pointId, RequestUser requestUser) {
+    public Long recollect(Long pointId, RequestUser requestUser) {
         PointDto usedPoint = pointCommonService.findByPointId(pointId)
                 .orElseThrow(() -> new NotFoundPointException(pointId));
 
@@ -65,7 +65,9 @@ public class DefaultPointService implements PointService {
             throw new DoesNotMatchPointOwnerException();
         }
 
-
+        PointDto basePoint = basePoint(requestUser.getUserId());
+        PointDto recollectPoint = basePoint.recollect(usedPoint.getChangedAmount());
+        return pointCommonService.save(recollectPoint).getId();
     }
 
     @Override

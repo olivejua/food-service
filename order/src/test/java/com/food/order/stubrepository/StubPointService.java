@@ -41,8 +41,10 @@ public class StubPointService implements PointService {
     }
 
     @Override
-    public void recollect(Long pointId, RequestUser requestUser) {
+    public Long recollect(Long pointId, RequestUser requestUser) {
         calledToRecollectPoints = true;
+
+        return null;
     }
 
     @Override

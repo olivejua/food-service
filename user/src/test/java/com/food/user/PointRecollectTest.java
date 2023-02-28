@@ -1,13 +1,13 @@
 package com.food.user;
 
 import com.food.common.user.business.external.PointService;
+import com.food.common.user.business.internal.dto.PointDto;
 import com.food.common.user.business.internal.dto.UserDto;
 import com.food.common.user.enumeration.PointType;
 import com.food.common.utils.Amount;
 import com.food.common.utils.UsedPoints;
 import com.food.user.business.DefaultPointService;
 import com.food.user.error.DoesNotMatchPointOwnerException;
-import com.food.user.error.DuplicatePointRecollectException;
 import com.food.user.error.NotFoundPointException;
 import com.food.user.mock.MockPoint;
 import com.food.user.mock.MockRequestUser;
@@ -19,15 +19,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.Assert;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PointRecollectTest {
     /**
      * 취소할 사용 pointId는 null일 수 없다.
      * 요청자와 사용포인트 대상유저는 일치해야한다.
      * 포인트 ID로 된 데이터가 존재해야한다.
-     * 이미 사용 취소처리가 된 포인트 건이라면 예외가 발생한다.
      * 사용자 포인트 잔액을 변경하고, 취소 포인트 데이터를 저장한다.
      */
 
@@ -72,8 +72,18 @@ public class PointRecollectTest {
     }
 
     @Test
-    void 이미_재적립이_된_포인트라면_예외가_발생한다() {
-        assertThrows(DuplicatePointRecollectException.class, () -> pointService.recollect(givenUsedMockPointIdPresent(), mockRequestUser));
+    void 사용포인트를_재적립하고_저장한다() {
+        Amount pointBalance = Amount.won(1000);
+        UsedPoints usedPoints = UsedPoints.won(2000);
+        Long mockPointId = givenUsedMockPointIdPresent(usedPoints, pointBalance);
+
+        Long recollectedPointId = pointService.recollect(mockPointId, mockRequestUser);
+        Optional<PointDto> findPoint = stubPointService.findByPointId(recollectedPointId);
+        assertTrue(findPoint.isPresent());
+
+        PointDto recollectedPoint = findPoint.get();
+        assertEquals(usedPoints, recollectedPoint.getChangedAmount());
+        assertEquals(pointBalance.plus(usedPoints), recollectedPoint.getCurrentAmount());
     }
 
     private Long givenUserIdPresent() {
@@ -87,6 +97,17 @@ public class PointRecollectTest {
                 .type(PointType.USE)
                 .changedAmount(UsedPoints.won(2000))
                 .currentAmount(Amount.won(1000))
+                .build();
+
+        return stubPointService.save(mockPoint).getId();
+    }
+
+    private Long givenUsedMockPointIdPresent(UsedPoints usedPoints, Amount pointBalance) {
+        MockPoint mockPoint = MockPoint.testBuilder()
+                .userId(mockRequestUser.getUserId())
+                .type(PointType.USE)
+                .changedAmount(usedPoints)
+                .currentAmount(pointBalance)
                 .build();
 
         return stubPointService.save(mockPoint).getId();
