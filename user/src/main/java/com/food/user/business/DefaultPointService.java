@@ -9,7 +9,9 @@ import com.food.common.user.business.internal.dto.PointDto;
 import com.food.common.user.business.internal.dto.UserDto;
 import com.food.common.utils.Amount;
 import com.food.common.utils.UsedPoints;
+import com.food.user.error.DoesNotMatchPointOwnerException;
 import com.food.user.error.InsufficientPointBalanceException;
+import com.food.user.error.NotFoundPointException;
 import com.food.user.error.NotFoundPointOwnerException;
 import org.springframework.stereotype.Service;
 
@@ -55,17 +57,37 @@ public class DefaultPointService implements PointService {
     }
 
     @Override
-    public void recollectUsedPoint(Long pointId) {
+    public Long recollect(Long pointId, RequestUser requestUser) {
+        PointDto usedPoint = pointCommonService.findByPointId(pointId)
+                .orElseThrow(() -> new NotFoundPointException(pointId));
 
+        validateIfPointOwnerAndRequestUserAreSame(usedPoint, requestUser);
+
+        PointDto basePoint = basePoint(requestUser.getUserId());
+        PointDto recollectPoint = basePoint.recollect(usedPoint.getChangedAmount());
+        return pointCommonService.save(recollectPoint).getId();
     }
 
     @Override
-    public void retrieveCollectedPoint(Long paymentId) {
+    public Long retrieve(Long paymentId, RequestUser requestUser) {
+        PointDto collectedPoint = pointCommonService.findByPaymentId(paymentId)
+                .orElseThrow(NotFoundPointException::new);
 
+        validateIfPointOwnerAndRequestUserAreSame(collectedPoint, requestUser);
+
+        PointDto basePoint = basePoint(requestUser.getUserId());
+        PointDto retrievePoint = basePoint.retrieve(collectedPoint.getChangedAmount());
+        return pointCommonService.save(retrievePoint).getId();
     }
 
     private PointDto basePoint(Long ownerId) {
         return pointCommonService.findLatestPointByUserId(ownerId)
                 .orElse(PointDto.createBasePoint(ownerId));
+    }
+
+    private void validateIfPointOwnerAndRequestUserAreSame(PointDto point, RequestUser requestUser) {
+        if (point.hasSameOwnerIdAs(requestUser.getUserId())) return;
+
+        throw new DoesNotMatchPointOwnerException();
     }
 }

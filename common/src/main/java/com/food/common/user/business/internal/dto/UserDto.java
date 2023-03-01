@@ -1,24 +1,23 @@
 package com.food.common.user.business.internal.dto;
 
 import com.food.common.user.domain.User;
-import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotNull;
 
+import static lombok.AccessLevel.PROTECTED;
+
+@NoArgsConstructor(access = PROTECTED)
 @Getter
-public final class UserDto {
-    private final Long id;
-    private final String nickname;
+public class UserDto {
+    protected Long id;
+    protected String nickname;
 
     public UserDto(@NotNull final User user) {
         this.id = user.getId();
         this.nickname = user.getNickname();
     }
 
-    @Builder
-    public UserDto(Long id, String nickname) {
-        this.id = id;
-        this.nickname = nickname;
-    }
+
 }

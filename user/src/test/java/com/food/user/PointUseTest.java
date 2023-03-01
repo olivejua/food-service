@@ -22,14 +22,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PointUseTest {
-    /**
-     * [사용]
-     * 사용 대상자가 존재하지 않으면 예외가 발생한다. (v)
-     * 사용포인트는 0이상이고, 10원단위여야 한다. (v)
-     * 포인트 잔액이 사용 포인트보다 부족하면 예외가 발생한다. (v)
-     * 잔액포인트를 차감한다. (v)
-     */
-
     private StubUserService stubUserService;
     private StubPointService stubPointService;
     private PointService pointService;

@@ -4,12 +4,17 @@ import com.food.common.payment.domain.Payment;
 import com.food.common.payment.enumeration.PaymentActionType;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.springframework.util.Assert;
 
+import static lombok.AccessLevel.PROTECTED;
+
+@NoArgsConstructor(access = PROTECTED)
 @Getter
-public final class PaymentDto {
-    private final Long id;
-    private final Long orderId;
-    private final PaymentActionType actionType;
+public class PaymentDto {
+    protected Long id;
+    protected Long orderId;
+    protected PaymentActionType actionType;
 
     @Builder
     public PaymentDto(Long id, Long orderId, PaymentActionType actionType) {
@@ -19,6 +24,8 @@ public final class PaymentDto {
     }
 
     public PaymentDto(Payment payment) {
+        Assert.notNull(payment, "payment must not be null.");
+
         id = payment.getId();
         orderId = payment.getOrder().getId();
         actionType = payment.getActionType();

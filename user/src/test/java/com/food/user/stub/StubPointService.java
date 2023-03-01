@@ -2,11 +2,10 @@ package com.food.user.stub;
 
 import com.food.common.user.business.internal.PointCommonService;
 import com.food.common.user.business.internal.dto.PointDto;
-import com.food.common.user.business.internal.dto.PointSaveDto;
 import com.food.user.mock.MockPoint;
 
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -60,18 +59,15 @@ public class StubPointService implements PointCommonService {
     }
 
     @Override
-    public Long save(PointSaveDto request) {
-        return null;
-    }
-
-    @Override
     public Optional<PointDto> findByPointId(Long pointId) {
         return Optional.ofNullable(data.get(pointId));
     }
 
     @Override
-    public List<PointDto> findAllByPaymentId(Long paymentId) {
-        return null;
+    public Optional<PointDto> findByPaymentId(Long paymentId) {
+        return data.values().stream()
+                .filter(targetPoint -> targetPoint.getPaymentId().equals(paymentId))
+                .max(Comparator.comparing(PointDto::getCreatedDate));
     }
 
     public boolean isCalledToSave() {

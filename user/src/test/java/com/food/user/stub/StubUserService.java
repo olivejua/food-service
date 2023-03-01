@@ -3,6 +3,7 @@ package com.food.user.stub;
 import com.food.common.user.business.internal.UserCommonService;
 import com.food.common.user.business.internal.dto.UserDto;
 import com.food.common.user.enumeration.Role;
+import com.food.user.mock.MockUser;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +23,7 @@ public class StubUserService implements UserCommonService {
             return user;
         }
 
-        UserDto newOne = UserDto.builder()
+        UserDto newOne = MockUser.testBuilder()
                 .id(autoIncrementKey--)
                 .nickname(user.getNickname())
                 .build();

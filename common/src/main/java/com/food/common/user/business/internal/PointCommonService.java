@@ -1,10 +1,8 @@
 package com.food.common.user.business.internal;
 
 import com.food.common.user.business.internal.dto.PointDto;
-import com.food.common.user.business.internal.dto.PointSaveDto;
 
 import javax.validation.constraints.NotNull;
-import java.util.List;
 import java.util.Optional;
 
 public interface PointCommonService {
@@ -22,8 +20,6 @@ public interface PointCommonService {
      */
     Optional<PointDto> findLatestPointByUserId(@NotNull Long userId);
 
-    Long save(@NotNull PointSaveDto request);
-
     /**
      * ID로 포인트데이터를 리턴한다.
      * @param pointId 포인트 ID. null일 수 없다.
@@ -32,7 +28,9 @@ public interface PointCommonService {
     Optional<PointDto> findByPointId(@NotNull Long pointId);
 
     /**
-     * 해당 결제 건에 관련된 포인트 정보를 모두 가져온다. (정렬기준: 최신순)
+     * 주어진 결제ID의 포인트 데이터를 리턴한다. (다수일 경우 최신순)
+     * @param paymentId 결제 ID. null일 수 없다.
+     * @return 주어진 결제ID를 보유한 포인트데이터 또는 찾을 수 없는 경우 Optional#empty()
      */
-    List<PointDto> findAllByPaymentId(@NotNull Long paymentId);
+    Optional<PointDto> findByPaymentId(@NotNull Long paymentId);
 }

@@ -52,7 +52,7 @@ public class PointDto {
         return point;
     }
 
-    public PointDto use(UsedPoints usedAmount) {
+    public PointDto use(@NotNull UsedPoints usedAmount) {
         PointDto point = new PointDto();
         point.userId = userId;
         point.type = PointType.COLLECT;
@@ -61,5 +61,31 @@ public class PointDto {
         point.paymentId = paymentId;
 
         return point;
+    }
+
+    public PointDto recollect(@NotNull Amount recollectAmount) {
+        PointDto point = new PointDto();
+        point.userId = userId;
+        point.type = PointType.RECOLLECT;
+        point.changedAmount = recollectAmount;
+        point.currentAmount = this.currentAmount.plus(recollectAmount);
+        point.paymentId = paymentId;
+
+        return point;
+    }
+
+    public PointDto retrieve(@NotNull Amount retrieveAmount) {
+        PointDto point = new PointDto();
+        point.userId = userId;
+        point.type = PointType.RETRIEVE;
+        point.changedAmount = retrieveAmount;
+        point.currentAmount = this.currentAmount.subtract(retrieveAmount);
+        point.paymentId = paymentId;
+
+        return point;
+    }
+
+    public boolean hasSameOwnerIdAs(Long pointOwnerId) {
+        return this.userId.equals(pointOwnerId);
     }
 }
