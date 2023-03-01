@@ -57,11 +57,6 @@ public class StubPointService implements PointCommonService {
     }
 
     @Override
-    public Long save(PointSaveDto request) {
-        return null;
-    }
-
-    @Override
     public Optional<PointDto> findByPointId(Long pointId) {
         return Optional.ofNullable(data.get(pointId));
     }

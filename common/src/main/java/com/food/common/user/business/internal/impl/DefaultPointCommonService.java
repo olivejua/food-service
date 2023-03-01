@@ -40,18 +40,6 @@ public class DefaultPointCommonService implements PointCommonService {
         return Optional.of(new PointDto(optionalPoint.get()));
     }
 
-    @Override
-    public Long save(PointSaveDto request) {
-        User user = findUser(request.getUsedId());
-
-        Point basePoint = findLatestPointByUser(user)
-                .orElse(Point.createFirstPoint(user));
-
-        Point changedPoint = createChangedPoint(request, basePoint);
-
-        return pointRepository.save(changedPoint).getId();
-    }
-
     private Point createChangedPoint(PointSaveDto request, Point basePoint) {
         Point result;
         switch (request.getType()) {
