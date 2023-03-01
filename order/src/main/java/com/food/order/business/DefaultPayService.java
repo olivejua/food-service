@@ -111,7 +111,7 @@ public class DefaultPayService implements PayService {
                 .sum();
 
         if (paymentAmount > 0) {
-            pointService.retrieveCollectedPoint(paymentId);
+            pointService.retrieve(paymentId);
         }
     }
 }

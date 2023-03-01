@@ -30,6 +30,6 @@ public interface PointService {
      */
     Long recollect(@NotNull Long pointId, @NotNull RequestUser requestUser);
 
-    void retrieveCollectedPoint(@NotNull Long paymentId);
+    void retrieve(@NotNull Long paymentId);
 }
 

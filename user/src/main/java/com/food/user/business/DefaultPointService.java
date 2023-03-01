@@ -71,7 +71,7 @@ public class DefaultPointService implements PointService {
     }
 
     @Override
-    public void retrieveCollectedPoint(Long paymentId) {
+    public void retrieve(Long paymentId) {
 
     }
 
