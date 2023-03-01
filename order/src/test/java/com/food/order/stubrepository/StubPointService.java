@@ -48,7 +48,7 @@ public class StubPointService implements PointService {
     }
 
     @Override
-    public void retrieve(Long paymentId) {
+    public void retrieve(Long paymentId, RequestUser requestUser) {
         calledToRetrievePoints = true;
     }
 }
