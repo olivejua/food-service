@@ -8,4 +8,8 @@ public class NotFoundPointException extends RuntimeException {
     public NotFoundPointException(Long pointId) {
         super(ERROR.appendMessage("pointId=" + pointId));
     }
+
+    public NotFoundPointException() {
+        super(ERROR.getMessage());
+    }
 }

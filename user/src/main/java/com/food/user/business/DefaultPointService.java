@@ -72,7 +72,8 @@ public class DefaultPointService implements PointService {
 
     @Override
     public void retrieve(Long paymentId, RequestUser requestUser) {
-
+        pointCommonService.findByPaymentId(paymentId)
+                .orElseThrow(NotFoundPointException::new);
     }
 
     private PointDto basePoint(Long ownerId) {

@@ -12,9 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Transactional
@@ -84,12 +82,11 @@ public class DefaultPointCommonService implements PointCommonService {
     }
 
     @Override
-    public List<PointDto> findAllByPaymentId(Long paymentId) {
+    public Optional<PointDto> findByPaymentId(Long paymentId) {
         Payment payment = paymentEntityService.findById(paymentId);
 
-        return pointRepository.findAllByPaymentOrderByCreatedDateDesc(payment).stream()
-                .map(PointDto::new)
-                .collect(Collectors.toList());
+        return pointRepository.findFirstByPaymentOrderByCreatedDateDesc(payment)
+                .map(PointDto::new);
     }
 
     private Optional<Point> findLatestPointByUser(User user) {

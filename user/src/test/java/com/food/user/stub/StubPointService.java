@@ -5,10 +5,7 @@ import com.food.common.user.business.internal.dto.PointDto;
 import com.food.common.user.business.internal.dto.PointSaveDto;
 import com.food.user.mock.MockPoint;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class StubPointService implements PointCommonService {
     private final Map<Long, PointDto> data = new HashMap<>();
@@ -70,8 +67,10 @@ public class StubPointService implements PointCommonService {
     }
 
     @Override
-    public List<PointDto> findAllByPaymentId(Long paymentId) {
-        return null;
+    public Optional<PointDto> findByPaymentId(Long paymentId) {
+        return data.values().stream()
+                .filter(targetPoint -> targetPoint.getPaymentId().equals(paymentId))
+                .max(Comparator.comparing(PointDto::getCreatedDate));
     }
 
     public boolean isCalledToSave() {
