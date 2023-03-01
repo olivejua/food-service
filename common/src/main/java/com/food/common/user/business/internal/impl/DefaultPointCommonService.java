@@ -4,7 +4,6 @@ import com.food.common.payment.business.internal.impl.PaymentEntityService;
 import com.food.common.payment.domain.Payment;
 import com.food.common.user.business.internal.PointCommonService;
 import com.food.common.user.business.internal.dto.PointDto;
-import com.food.common.user.business.internal.dto.PointSaveDto;
 import com.food.common.user.domain.Point;
 import com.food.common.user.domain.User;
 import com.food.common.user.repository.PointRepository;
@@ -38,28 +37,6 @@ public class DefaultPointCommonService implements PointCommonService {
         if (optionalPoint.isEmpty()) return Optional.empty();
 
         return Optional.of(new PointDto(optionalPoint.get()));
-    }
-
-    private Point createChangedPoint(PointSaveDto request, Point basePoint) {
-        Point result;
-        switch (request.getType()) {
-            case COLLECT -> {
-                Payment payment = paymentEntityService.findById(request.getPaymentId());
-                result = basePoint.collect(request.getAmount(), payment);
-            }
-            case USE -> {
-                result = basePoint.use(request.getAmount());
-            }
-            case RETRIEVE -> {
-                Payment payment = paymentEntityService.findById(request.getPaymentId());
-                result = basePoint.retrieve(request.getAmount(), payment);
-            }
-            case RECOLLECT -> {
-                result = basePoint.recollect(request.getAmount());
-            }
-            default -> throw new IllegalStateException("Unexpected value: " + request.getType());
-        }
-        return result;
     }
 
 
