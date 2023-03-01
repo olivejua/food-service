@@ -24,13 +24,6 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class PointRecollectTest {
-    /**
-     * 취소할 사용 pointId는 null일 수 없다.
-     * 요청자와 사용포인트 대상유저는 일치해야한다.
-     * 포인트 ID로 된 데이터가 존재해야한다.
-     * 사용자 포인트 잔액을 변경하고, 취소 포인트 데이터를 저장한다.
-     */
-
     private StubUserService stubUserService;
     private StubPointService stubPointService;
     private PointService pointService;

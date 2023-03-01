@@ -36,12 +36,6 @@ public class PointRetrieveTest {
         mockRequestUser = new MockRequestUser(givenUserIdPresent());
     }
 
-    /**
-     * 요청 결제ID로 적립된 건이 존재하지 않으면 예외가 발생한다.
-     * 요청자와 사용포인트 적립포인트유저는 일치해야한다.
-     * 사용자의 포인트 잔액을 적립포인트금액만큼 차감하고, 회수 포인트 데이터를 저장한다.
-     */
-
     @Test
     void 요청결제ID로_적립포인트_데이터가_존재하지_않으면_예외가_발생한다() {
         assertThrows(NotFoundPointException.class, () -> pointService.retrieve(givenPaymentIdNotPresent(), mockRequestUser));
