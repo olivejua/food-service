@@ -3,7 +3,9 @@ package com.food.user;
 import com.food.common.user.business.external.PointService;
 import com.food.common.user.business.internal.dto.UserDto;
 import com.food.common.user.enumeration.PointType;
+import com.food.common.utils.Amount;
 import com.food.user.business.DefaultPointService;
+import com.food.user.error.DoesNotMatchPointOwnerException;
 import com.food.user.error.NotFoundPointException;
 import com.food.user.mock.MockPoint;
 import com.food.user.mock.MockRequestUser;
@@ -13,6 +15,7 @@ import com.food.user.stub.StubPointService;
 import com.food.user.stub.StubUserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.util.Assert;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -40,8 +43,32 @@ public class PointRetrieveTest {
     @Test
     void 요청결제ID로_적립포인트_데이터가_존재하지_않으면_예외가_발생한다() {
         assertThrows(NotFoundPointException.class, () -> pointService.retrieve(givenPaymentIdNotPresent(), mockRequestUser));
+    }
 
-        assertDoesNotThrow(() -> pointService.retrieve(givenPaymentIdPresent(), mockRequestUser));
+    @Test
+    void 적립포인트_유저와_요청자는_일치해야한다() {
+        Long pointOwnerId = givenUserIdPresent();
+        Long requestUserId = givenUserIdPresent();
+        Assert.isTrue(!requestUserId.equals(pointOwnerId));
+
+        assertThrows(DoesNotMatchPointOwnerException.class, () -> pointService.retrieve(givenPaymentIdPresent(pointOwnerId), new MockRequestUser(requestUserId)));
+
+        assertDoesNotThrow(() -> pointService.retrieve(givenPaymentIdPresent(pointOwnerId), new MockRequestUser(pointOwnerId)));
+    }
+
+    @Test
+    void 사용자의_포인트_잔액을_적립금액만큼_차감하고_회수포인트_데이터를_저장한다() {
+        MockPoint collectMockPoint = MockPoint.testBuilder()
+                .paymentId(1L)
+                .userId(mockRequestUser.getUserId())
+                .type(PointType.COLLECT)
+                .changedAmount(Amount.won(1000))
+                .currentAmount(Amount.won(3000))
+                .build();
+        stubPointService.save(collectMockPoint);
+
+        pointService.retrieve(collectMockPoint.getPaymentId(), mockRequestUser);
+
     }
 
     private Long givenUserIdPresent() {
@@ -59,9 +86,10 @@ public class PointRetrieveTest {
         return paymentId;
     }
 
-    private Long givenPaymentIdPresent() {
+    private Long givenPaymentIdPresent(Long userId) {
         MockPoint mockPoint = MockPoint.testBuilder()
                 .paymentId(1L)
+                .userId(userId)
                 .type(PointType.COLLECT)
                 .build();
 

@@ -61,9 +61,7 @@ public class DefaultPointService implements PointService {
         PointDto usedPoint = pointCommonService.findByPointId(pointId)
                 .orElseThrow(() -> new NotFoundPointException(pointId));
 
-        if (!usedPoint.hasSameOwnerIdAs(requestUser.getUserId())) {
-            throw new DoesNotMatchPointOwnerException();
-        }
+        validateIfPointOwnerAndRequestUserAreSame(usedPoint, requestUser);
 
         PointDto basePoint = basePoint(requestUser.getUserId());
         PointDto recollectPoint = basePoint.recollect(usedPoint.getChangedAmount());
@@ -72,12 +70,20 @@ public class DefaultPointService implements PointService {
 
     @Override
     public void retrieve(Long paymentId, RequestUser requestUser) {
-        pointCommonService.findByPaymentId(paymentId)
+        PointDto collectedPoint = pointCommonService.findByPaymentId(paymentId)
                 .orElseThrow(NotFoundPointException::new);
+
+        validateIfPointOwnerAndRequestUserAreSame(collectedPoint, requestUser);
     }
 
     private PointDto basePoint(Long ownerId) {
         return pointCommonService.findLatestPointByUserId(ownerId)
                 .orElse(PointDto.createBasePoint(ownerId));
+    }
+
+    private void validateIfPointOwnerAndRequestUserAreSame(PointDto point, RequestUser requestUser) {
+        if (point.hasSameOwnerIdAs(requestUser.getUserId())) return;
+
+        throw new DoesNotMatchPointOwnerException();
     }
 }
