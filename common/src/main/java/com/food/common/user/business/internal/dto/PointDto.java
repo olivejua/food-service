@@ -74,6 +74,17 @@ public class PointDto {
         return point;
     }
 
+    public PointDto retrieve(@NotNull Amount retrieveAmount) {
+        PointDto point = new PointDto();
+        point.userId = userId;
+        point.type = PointType.RETRIEVE;
+        point.changedAmount = retrieveAmount;
+        point.currentAmount = this.currentAmount.subtract(retrieveAmount);
+        point.paymentId = paymentId;
+
+        return point;
+    }
+
     public boolean hasSameOwnerIdAs(Long pointOwnerId) {
         return this.userId.equals(pointOwnerId);
     }

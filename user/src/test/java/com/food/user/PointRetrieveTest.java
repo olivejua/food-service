@@ -1,6 +1,7 @@
 package com.food.user;
 
 import com.food.common.user.business.external.PointService;
+import com.food.common.user.business.internal.dto.PointDto;
 import com.food.common.user.business.internal.dto.UserDto;
 import com.food.common.user.enumeration.PointType;
 import com.food.common.utils.Amount;
@@ -17,8 +18,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.Assert;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PointRetrieveTest {
     private StubUserService stubUserService;
@@ -52,12 +54,11 @@ public class PointRetrieveTest {
         Assert.isTrue(!requestUserId.equals(pointOwnerId));
 
         assertThrows(DoesNotMatchPointOwnerException.class, () -> pointService.retrieve(givenPaymentIdPresent(pointOwnerId), new MockRequestUser(requestUserId)));
-
-        assertDoesNotThrow(() -> pointService.retrieve(givenPaymentIdPresent(pointOwnerId), new MockRequestUser(pointOwnerId)));
     }
 
     @Test
     void 사용자의_포인트_잔액을_적립금액만큼_차감하고_회수포인트_데이터를_저장한다() {
+        //given
         MockPoint collectMockPoint = MockPoint.testBuilder()
                 .paymentId(1L)
                 .userId(mockRequestUser.getUserId())
@@ -67,8 +68,16 @@ public class PointRetrieveTest {
                 .build();
         stubPointService.save(collectMockPoint);
 
-        pointService.retrieve(collectMockPoint.getPaymentId(), mockRequestUser);
+        //when
+        Long pointId = pointService.retrieve(collectMockPoint.getPaymentId(), mockRequestUser);
 
+        //then
+        Optional<PointDto> retrievePointOptional = stubPointService.findByPointId(pointId);
+        assertTrue(retrievePointOptional.isPresent());
+        PointDto findPoint = retrievePointOptional.get();
+        assertEquals(PointType.RETRIEVE, findPoint.getType());
+        assertEquals(collectMockPoint.getChangedAmount(), findPoint.getChangedAmount());
+        assertEquals(Amount.won(2000), findPoint.getCurrentAmount());
     }
 
     private Long givenUserIdPresent() {

@@ -69,11 +69,15 @@ public class DefaultPointService implements PointService {
     }
 
     @Override
-    public void retrieve(Long paymentId, RequestUser requestUser) {
+    public Long retrieve(Long paymentId, RequestUser requestUser) {
         PointDto collectedPoint = pointCommonService.findByPaymentId(paymentId)
                 .orElseThrow(NotFoundPointException::new);
 
         validateIfPointOwnerAndRequestUserAreSame(collectedPoint, requestUser);
+
+        PointDto basePoint = basePoint(requestUser.getUserId());
+        PointDto retrievePoint = basePoint.retrieve(collectedPoint.getChangedAmount());
+        return pointCommonService.save(retrievePoint).getId();
     }
 
     private PointDto basePoint(Long ownerId) {

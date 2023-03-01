@@ -35,6 +35,6 @@ public interface PointService {
      * @param paymentId 적립된 결제 ID
      * @param requestUser 포인트 회수 대상 소유자. 현재 로그인한 유저가 포인트 재적립 대상이 된다.
      */
-    void retrieve(@NotNull Long paymentId, @NotNull RequestUser requestUser);
+    Long retrieve(@NotNull Long paymentId, @NotNull RequestUser requestUser);
 }
 
