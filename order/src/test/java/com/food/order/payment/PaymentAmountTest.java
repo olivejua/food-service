@@ -1,4 +1,4 @@
-package com.food.order;
+package com.food.order.payment;
 
 import com.food.common.order.business.internal.dto.OrderDto;
 import com.food.common.payment.business.external.PaymentAmountService;
@@ -9,11 +9,11 @@ import com.food.common.payment.enumeration.PaymentMethod;
 import com.food.common.utils.Amount;
 import com.food.order.business.DefaultPaymentAmountService;
 import com.food.order.error.NotFoundPaymentException;
-import com.food.order.mock.MockOrder;
-import com.food.order.mock.MockPaymentLog;
-import com.food.order.stubrepository.StubOrderService;
-import com.food.order.stubrepository.StubPaymentLogService;
-import com.food.order.stubrepository.StubPaymentService;
+import com.food.order.payment.mock.MockOrder;
+import com.food.order.payment.mock.MockPaymentLog;
+import com.food.order.payment.stubrepository.StubOrderService;
+import com.food.order.payment.stubrepository.StubPaymentLogService;
+import com.food.order.payment.stubrepository.StubPaymentService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

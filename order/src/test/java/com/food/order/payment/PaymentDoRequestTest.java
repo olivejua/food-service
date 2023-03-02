@@ -1,4 +1,4 @@
-package com.food.order;
+package com.food.order.payment;
 
 import com.food.common.error.CommonErrors;
 import com.food.common.error.exception.InvalidRequestParameterException;

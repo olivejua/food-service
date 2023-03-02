@@ -1,4 +1,4 @@
-package com.food.order.stubrepository;
+package com.food.order.payment.stubrepository;
 
 import com.food.common.user.business.external.PointService;
 import com.food.common.user.business.external.model.RequestUser;

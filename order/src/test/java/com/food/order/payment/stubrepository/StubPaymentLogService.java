@@ -1,4 +1,4 @@
-package com.food.order.stubrepository;
+package com.food.order.payment.stubrepository;
 
 import com.food.common.payment.business.external.model.payrequest.PaymentElement;
 import com.food.common.payment.business.internal.PaymentLogCommonService;

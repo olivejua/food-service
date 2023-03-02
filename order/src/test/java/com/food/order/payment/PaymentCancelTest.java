@@ -1,15 +1,15 @@
-package com.food.order;
+package com.food.order.payment;
 
 import com.food.common.order.business.internal.dto.OrderDto;
 import com.food.common.payment.business.internal.model.PaymentDto;
-import com.food.order.mock.MockOrder;
-import com.food.order.mock.MockPayment;
-import com.food.order.mock.MockPaymentLog;
-import com.food.order.mock.MockRequestUser;
-import com.food.order.stubrepository.StubOrderService;
-import com.food.order.stubrepository.StubPaymentLogService;
-import com.food.order.stubrepository.StubPaymentService;
-import com.food.order.stubrepository.StubPointService;
+import com.food.order.payment.mock.MockOrder;
+import com.food.order.payment.mock.MockPayment;
+import com.food.order.payment.mock.MockPaymentLog;
+import com.food.order.payment.mock.MockRequestUser;
+import com.food.order.payment.stubrepository.StubOrderService;
+import com.food.order.payment.stubrepository.StubPaymentLogService;
+import com.food.order.payment.stubrepository.StubPaymentService;
+import com.food.order.payment.stubrepository.StubPointService;
 import com.food.order.business.DefaultPayService;
 import com.food.order.error.InvalidPaymentActionTypeException;
 import com.food.order.error.NotFoundPaymentException;
