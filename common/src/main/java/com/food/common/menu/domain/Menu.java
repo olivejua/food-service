@@ -54,4 +54,8 @@ public class Menu {
 
         return menu;
     }
+
+    public Long getStoreId() {
+        return store.getId();
+    }
 }
