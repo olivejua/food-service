@@ -1,6 +1,7 @@
 package com.food.common.menu.domain;
 
 import com.food.common.store.domain.Store;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
 import org.hibernate.validator.constraints.Length;
@@ -14,6 +15,7 @@ import static javax.persistence.FetchType.LAZY;
 import static javax.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
+@Getter
 @NoArgsConstructor(access = PROTECTED)
 @Table(name = "tb_menu")
 @Entity
@@ -41,14 +43,14 @@ public class Menu {
 
     @Comment("조리 시간 (분 단위)")
     @NotNull
-    private Integer cookingTime;
+    private Integer cookingMinutes;
 
-    public static Menu create(Store store, String name, Integer amount, Integer cookingTime) {
+    public static Menu create(Store store, String name, Integer amount, Integer cookingMinutes) {
         Menu menu = new Menu();
         menu.store = store;
         menu.name = name;
         menu.amount = amount;
-        menu.cookingTime = cookingTime;
+        menu.cookingMinutes = cookingMinutes;
 
         return menu;
     }
