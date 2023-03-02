@@ -1,4 +1,4 @@
-package com.food.order.mock;
+package com.food.order.payment.mock;
 
 import com.food.common.order.business.internal.dto.OrderDto;
 import com.food.common.order.enumeration.OrderStatus;

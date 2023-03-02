@@ -1,4 +1,4 @@
-package com.food.order.mock;
+package com.food.order.payment.mock;
 
 import com.food.common.user.business.external.model.RequestUser;
 import com.food.common.user.enumeration.AccountType;

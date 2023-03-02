@@ -1,4 +1,4 @@
-package com.food.order.stubrepository;
+package com.food.order.payment.stubrepository;
 
 import com.food.common.order.business.internal.OrderCommonService;
 import com.food.common.order.business.internal.dto.OrderDto;
