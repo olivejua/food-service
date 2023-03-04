@@ -2,6 +2,13 @@ package com.food.order.order;
 
 import com.food.common.error.CommonErrors;
 import com.food.common.error.exception.InvalidRequestParameterException;
+import com.food.common.store.domain.type.OpenStatus;
+import com.food.common.utils.Amount;
+import com.food.order.common.stub.StubOrderService;
+import com.food.order.order.mock.MockMenu;
+import com.food.order.order.mock.MockStore;
+import com.food.order.order.stubrepository.StubStoreCommonService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
@@ -13,28 +20,43 @@ public class OrderTest {
     /**
      * 요구사항
      *
-     * 요청 정보거
-     * 메뉴 목록 (NotEmpty)
+     * 요청 정보
+     * 가게 ID , 메뉴 목록 (NotEmpty)
      * (메뉴 Unit: 메뉴 id, 수량, 선택지 목록) (NotNull)
      * (메뉴 선택지 Unit: 메뉴 선택지 id, 수량) (NotNull)
      *
      * 주문메뉴는 하나이상 존재해야한다. (v)
      * 주문메뉴의 수량은 1개 이상이어야한다. (v)
-     * 메뉴와 상점이 존재해야한다.
-     * 한 상점안의 메뉴만 주문이 가능하다.
-     * 상점은 Open 상태여야한다.
-     * 상점의 최소 주문금액보다 주문금액이 같거나 커야한다.
+     * 요청한 가게ID의 데이터가 존재해야한다. (v)
+     * 한 가게안의 메뉴만 주문이 가능하다. (v)
+     * 가게은 Open 상태여야한다. (v)
+     * 요청한 메뉴ID 목록의 데이터 전부 가게메뉴 내에 존재해야한다. (v)
+     * 가게의 최소 주문금액보다 주문금액이 같거나 커야한다.
      * 상태가 '요청'인 주문데이터를 저장하고, 저장된 주문 ID를 반환한다.
      */
+    private OrderService orderService;
+    private StubOrderService stubOrderCommonService;
+    private StubStoreCommonService stubStoreCommonService;
+    private StubMenuCommonService stubMenuCommonService;
+
+    @BeforeEach
+    void setup() {
+        stubOrderCommonService = new StubOrderService();
+        stubStoreCommonService = new StubStoreCommonService();
+        stubMenuCommonService = new StubMenuCommonService();
+        orderService = new DefaultOrderService(stubOrderCommonService, stubStoreCommonService, stubMenuCommonService);
+    }
 
     @Test
     void 주문메뉴는_하나이상_존재해야한다() {
-        InvalidRequestParameterException error = assertThrows(InvalidRequestParameterException.class, () -> new OrderDoRequest(Collections.emptyList()));
+        Long mockStoreId = 1L;
+
+        InvalidRequestParameterException error = assertThrows(InvalidRequestParameterException.class, () -> new OrderDoRequest(mockStoreId, Collections.emptyList()));
         assertEquals(CommonErrors.INVALID_REQUEST_PARAMETERS.getCode(), error.getErrorCode());
         assertTrue(error.getMessage().contains("주문메뉴는 하나이상 존재해야 합니다."));
 
         OrderMenuRequest orderMenuRequest = new OrderMenuRequest(1L, 1);
-        assertDoesNotThrow(() -> new OrderDoRequest(List.of(orderMenuRequest)));
+        assertDoesNotThrow(() -> new OrderDoRequest(mockStoreId, List.of(orderMenuRequest)));
     }
 
     @Test
@@ -54,7 +76,91 @@ public class OrderTest {
     }
 
     @Test
-    void 주문요청한_메뉴ID의_메뉴데이터가_존재해야한다() {
+    void 주문요청한_가게ID의_가게데이터가_존재해야한다() {
+        //given
+        Long mockStoreIdNotPresent = givenStoreIdNotPresent();
+
+        //when & then
+        NotFoundStoreException error = assertThrows(NotFoundStoreException.class, () -> orderService.order(new OrderDoRequest(mockStoreIdNotPresent, List.of(new OrderMenuRequest(1L, 1)))));
+        assertTrue(error.getMessage().contains(String.valueOf(mockStoreIdNotPresent)));
+    }
+
+    @Test
+    void 주문요청한_가게는_Open상태여아한다() {
+        //given
+        MockStore mockStore = MockStore.testBuilder()
+                .name("A Restaurant")
+                .minOrderAmount(Amount.won(10_000))
+                .status(OpenStatus.CLOSED)
+                .build();
+        Long mockStoreId = stubStoreCommonService.save(mockStore).getId();
+
+        //when & then
+        assertThrows(InvalidStoreOpenStatusException.class, () -> orderService.order(new OrderDoRequest(mockStoreId, List.of(new OrderMenuRequest(1L, 1)))));
+    }
+
+    @Test
+    void 요청한_메뉴ID_목록의_데이터_전부_가게메뉴_내에_존재해야한다() {
+        //given
+        Long mockStoreId1 = givenStoreIdPresent();
+        Long mockStoreId2 = givenStoreIdPresent();
+
+        Long aMenuId = stubMenuCommonService.save(MockMenu.testBuilder()
+                .storeId(mockStoreId1)
+                .name("A Menu")
+                .amount(Amount.won(12_000))
+                .build()).getId();
+
+        Long bMenuId = stubMenuCommonService.save(MockMenu.testBuilder()
+                .storeId(mockStoreId2)
+                .name("B Menu")
+                .amount(Amount.won(7_000))
+                .build()).getId();
+
+        //when & then
+        assertThrows(NotFoundMenuException.class,
+                () -> orderService.order(new OrderDoRequest(mockStoreId1,
+                        List.of(new OrderMenuRequest(aMenuId, 1), new OrderMenuRequest(bMenuId, 1)))));
+
+        //given
+        Long mockStoreId3 = givenStoreIdPresent();
+
+        Long cMenuId = stubMenuCommonService.save(MockMenu.testBuilder()
+                .storeId(mockStoreId3)
+                .name("C Menu")
+                .amount(Amount.won(14_000))
+                .build()).getId();
+
+        Long dMenuId = stubMenuCommonService.save(MockMenu.testBuilder()
+                .storeId(mockStoreId3)
+                .name("D Menu")
+                .amount(Amount.won(5_000))
+                .build()).getId();
+
+        assertDoesNotThrow(() -> orderService.order(new OrderDoRequest(mockStoreId3,
+                        List.of(new OrderMenuRequest(cMenuId, 1), new OrderMenuRequest(dMenuId, 2)))));
 
     }
+
+    private Long givenStoreIdNotPresent() {
+        Long storeId = 1L;
+
+        if (stubOrderCommonService.existsById(storeId)) {
+            throw new IllegalArgumentException();
+        }
+
+        return storeId;
+    }
+
+    private Long givenStoreIdPresent() {
+        MockStore mockStore = MockStore.testBuilder()
+                .name("A Restaurant")
+                .minOrderAmount(Amount.won(10_000))
+                .status(OpenStatus.OPEN)
+                .build();
+
+        return stubStoreCommonService.save(mockStore).getId();
+    }
+
+
 }
