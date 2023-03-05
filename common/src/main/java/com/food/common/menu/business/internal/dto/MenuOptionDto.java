@@ -1,4 +1,4 @@
-package com.food.store;
+package com.food.common.menu.business.internal.dto;
 
 import com.food.common.menu.domain.MenuOption;
 import lombok.Getter;
