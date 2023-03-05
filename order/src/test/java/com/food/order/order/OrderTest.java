@@ -17,23 +17,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class OrderTest {
-    /**
-     * 요구사항
-     *
-     * 요청 정보
-     * 가게 ID , 메뉴 목록 (NotEmpty)
-     * (메뉴 Unit: 메뉴 id, 수량, 선택지 목록) (NotNull)
-     * (메뉴 선택지 Unit: 메뉴 선택지 id, 수량) (NotNull)
-     *
-     * 주문메뉴는 하나이상 존재해야한다. (v)
-     * 주문메뉴의 수량은 1개 이상이어야한다. (v)
-     * 요청한 가게ID의 데이터가 존재해야한다. (v)
-     * 한 가게안의 메뉴만 주문이 가능하다. (v)
-     * 가게은 Open 상태여야한다. (v)
-     * 요청한 메뉴ID 목록의 데이터 전부 가게메뉴 내에 존재해야한다. (v)
-     * 가게의 최소 주문금액보다 주문금액이 같거나 커야한다.
-     * 상태가 '요청'인 주문데이터를 저장하고, 저장된 주문 ID를 반환한다.
-     */
     private OrderService orderService;
     private StubOrderService stubOrderCommonService;
     private StubStoreCommonService stubStoreCommonService;
