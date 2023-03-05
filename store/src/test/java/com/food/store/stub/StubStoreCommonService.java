@@ -1,8 +1,8 @@
-package com.food.order.order.stubrepository;
+package com.food.store.stub;
 
 import com.food.common.store.business.internal.StoreCommonService;
 import com.food.common.store.business.internal.dto.StoreDto;
-import com.food.order.order.mock.MockStore;
+import com.food.store.mock.MockStore;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,6 +36,6 @@ public class StubStoreCommonService implements StoreCommonService {
 
     @Override
     public boolean existsById(Long storeId) {
-        return false;
+        return data.containsKey(storeId);
     }
 }
