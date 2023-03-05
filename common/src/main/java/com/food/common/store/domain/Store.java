@@ -1,5 +1,6 @@
 package com.food.common.store.domain;
 
+import com.food.common.store.domain.type.OpenStatus;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
@@ -57,16 +58,6 @@ public class Store {
         return store;
     }
 
-    public enum OpenStatus {
-        OPEN("운영 중"),
-        CLOSED("운영 종료")
-        ;
 
-        private final String description;
-
-        OpenStatus(String description) {
-            this.description = description;
-        }
-    }
 
 }

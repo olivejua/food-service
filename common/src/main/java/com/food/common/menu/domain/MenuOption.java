@@ -1,5 +1,6 @@
 package com.food.common.menu.domain;
 
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
 import org.hibernate.validator.constraints.Length;
@@ -13,6 +14,7 @@ import static javax.persistence.FetchType.LAZY;
 import static javax.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
+@Getter
 @NoArgsConstructor(access = PROTECTED)
 @Table(name = "tb_menu_option")
 @Entity
@@ -51,5 +53,9 @@ public class MenuOption {
         menuOption.maxSize = maxSize;
 
         return menuOption;
+    }
+
+    public Long getMenuId() {
+        return menu.getId();
     }
 }

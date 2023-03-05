@@ -31,4 +31,8 @@ public class OrderMenuRequest {
             this.selections.addAll(addedSelections);
         }
     }
+
+    public Long getMenuId() {
+        return menuId;
+    }
 }

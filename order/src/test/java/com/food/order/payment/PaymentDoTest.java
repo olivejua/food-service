@@ -11,7 +11,7 @@ import com.food.order.payment.mock.MockOrder;
 import com.food.order.payment.mock.MockPayment;
 import com.food.order.payment.mock.MockRequestUser;
 import com.food.common.payment.business.external.model.PaymentDoRequest;
-import com.food.order.payment.stubrepository.StubOrderService;
+import com.food.order.common.stub.StubOrderService;
 import com.food.order.payment.stubrepository.StubPaymentLogService;
 import com.food.order.payment.stubrepository.StubPaymentService;
 import com.food.order.payment.stubrepository.StubPointService;

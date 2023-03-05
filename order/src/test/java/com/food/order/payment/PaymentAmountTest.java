@@ -11,7 +11,7 @@ import com.food.order.business.DefaultPaymentAmountService;
 import com.food.order.error.NotFoundPaymentException;
 import com.food.order.payment.mock.MockOrder;
 import com.food.order.payment.mock.MockPaymentLog;
-import com.food.order.payment.stubrepository.StubOrderService;
+import com.food.order.common.stub.StubOrderService;
 import com.food.order.payment.stubrepository.StubPaymentLogService;
 import com.food.order.payment.stubrepository.StubPaymentService;
 import org.junit.jupiter.api.Assertions;
