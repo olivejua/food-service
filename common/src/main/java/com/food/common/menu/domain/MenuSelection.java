@@ -1,5 +1,6 @@
 package com.food.common.menu.domain;
 
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Comment;
 import org.hibernate.validator.constraints.Length;
@@ -12,6 +13,7 @@ import static javax.persistence.FetchType.*;
 import static javax.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
+@Getter
 @NoArgsConstructor(access = PROTECTED)
 @Table(name = "tb_menu_selection")
 @Entity
@@ -43,5 +45,9 @@ public class MenuSelection {
         menuSelection.amount = amount;
 
         return menuSelection;
+    }
+
+    public Long getOptionId() {
+        return option.getId();
     }
 }
