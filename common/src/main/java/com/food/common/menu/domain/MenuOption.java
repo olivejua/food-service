@@ -2,13 +2,17 @@ package com.food.common.menu.domain;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Comment;
 import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
+import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static javax.persistence.FetchType.LAZY;
 import static javax.persistence.GenerationType.IDENTITY;
@@ -36,14 +40,18 @@ public class MenuOption {
     private String name;
 
     @Comment("최소 선택 개수")
-    @Size(max = 100)
+    @Max(100)
     @NotNull
     private Byte minSize;
 
     @Comment("최대 선택 개수")
-    @Size(max = 100)
+    @Max(100)
     @NotNull
     private Byte maxSize;
+
+    @BatchSize(size = 30)
+    @OneToMany(mappedBy = "option")
+    private final List<MenuSelection> selections = new ArrayList<>();
 
     public static MenuOption menuOption(Menu menu, String name, Byte minSize, Byte maxSize) {
         MenuOption menuOption = new MenuOption();
