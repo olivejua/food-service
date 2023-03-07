@@ -16,7 +16,7 @@ public class MenuSelectionDto {
     public MenuSelectionDto(@NotNull MenuSelection entity) {
         this.id = entity.getId();
         this.optionId = entity.getOptionId();
-        this.name = entity.getSelection();
+        this.name = entity.getName();
         this.amount = Amount.won(entity.getAmount());
     }
 }
