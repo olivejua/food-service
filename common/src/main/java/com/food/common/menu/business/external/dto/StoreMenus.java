@@ -47,7 +47,9 @@ public class StoreMenus {
             this.amount = menu.getAmount();
             this.cookingMinutes = menu.getCookingMinutes();
 
-            addAll(options, selections);
+            if (!CollectionUtils.isEmpty(options)) {
+                addAll(options, selections);
+            }
         }
 
         private void addAll(List<MenuOptionDto> options, Map<Long, List<MenuSelectionDto>> selections) {
@@ -70,7 +72,10 @@ public class StoreMenus {
             this.name = option.getName();
             this.minSize = option.getMinSize();
             this.maxSize = option.getMaxSize();
-            addAll(selections);
+
+            if (!CollectionUtils.isEmpty(selections)) {
+                addAll(selections);
+            }
         }
 
         private void addAll(List<MenuSelectionDto> selections) {
@@ -92,7 +97,7 @@ public class StoreMenus {
         public Selection(MenuSelectionDto selection) {
             this.id = selection.getId();
             this.name = selection.getName();
-            this.amount = getAmount();
+            this.amount = selection.getAmount();
         }
     }
 }

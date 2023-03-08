@@ -73,7 +73,24 @@ create table tb_menu
     store_id bigint not null,
     name varchar(50) not null,
     amount mediumint not null default 0,
-    cooking_time mediumint not null
+    cooking_minutes mediumint not null
+);
+
+create table tb_menu_option
+(
+    menu_option_id bigint auto_increment primary key,
+    menu_id bigint not null,
+    name varchar(30) not null,
+    min_size tinyint not null,
+    max_size tinyint not null
+);
+
+create table tb_menu_selection
+(
+    menu_selection_id bigint auto_increment primary key,
+    menu_option_id bigint not null,
+    name varchar(50) not null,
+    amount mediumint not null
 );
 
 create table tb_food_category

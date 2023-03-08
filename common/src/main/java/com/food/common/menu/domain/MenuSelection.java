@@ -31,7 +31,7 @@ public class MenuSelection {
     @Comment("선택지")
     @Length(max = 50)
     @NotNull
-    private String selection;
+    private String name;
 
     @Comment("금액")
     @PositiveOrZero
@@ -41,7 +41,7 @@ public class MenuSelection {
     public static MenuSelection create(MenuOption option, String selection, Integer amount) {
         MenuSelection menuSelection = new MenuSelection();
         menuSelection.option = option;
-        menuSelection.selection = selection;
+        menuSelection.name = selection;
         menuSelection.amount = amount;
 
         return menuSelection;
