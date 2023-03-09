@@ -35,14 +35,14 @@ public class StoreMenus {
 
     @Getter
     public static class Menu {
-        private Long menuId;
+        private Long id;
         private String name;
         private Amount amount;
         private Integer cookingMinutes;
         private final List<Option> options = new ArrayList<>();
 
         public Menu(MenuDto menu, List<MenuOptionDto> options, Map<Long, List<MenuSelectionDto>> selections) {
-            this.menuId = menu.getId();
+            this.id = menu.getId();
             this.name = menu.getName();
             this.amount = menu.getAmount();
             this.cookingMinutes = menu.getCookingMinutes();
@@ -61,14 +61,14 @@ public class StoreMenus {
 
     @Getter
     public static class Option {
-        private Long optionId;
+        private Long id;
         private String name;
         private Byte minSize;
         private Byte maxSize;
         private final List<Selection> selections = new ArrayList<>();
 
         public Option(MenuOptionDto option, List<MenuSelectionDto> selections) {
-            this.optionId = option.getId();
+            this.id = option.getId();
             this.name = option.getName();
             this.minSize = option.getMinSize();
             this.maxSize = option.getMaxSize();

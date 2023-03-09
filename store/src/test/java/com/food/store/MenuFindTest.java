@@ -80,7 +80,7 @@ public class MenuFindTest {
         List<StoreMenus.Menu> menus = result.getMenus();
 
         StoreMenus.Menu findAMenu = menus.stream()
-                .filter(menu -> menu.getMenuId().equals(mockMenuA.getId())).findFirst()
+                .filter(menu -> menu.getId().equals(mockMenuA.getId())).findFirst()
                 .orElseThrow(IllegalArgumentException::new);
         assertEquals(mockMenuA.getName(), findAMenu.getName());
         assertEquals(mockMenuA.getAmount(), findAMenu.getAmount());
@@ -89,7 +89,7 @@ public class MenuFindTest {
         assertEquals(1, findAMenu.getOptions().size());
 
         StoreMenus.Option findAOption = findAMenu.getOptions().get(0);
-        assertEquals(mockMenuOptionA.getId(), findAOption.getOptionId());
+        assertEquals(mockMenuOptionA.getId(), findAOption.getId());
         assertEquals(mockMenuOptionA.getName(), findAOption.getName());
         assertEquals(mockMenuOptionA.getMinSize(), findAOption.getMinSize());
         assertEquals(mockMenuOptionA.getMaxSize(), findAOption.getMaxSize());
@@ -104,7 +104,6 @@ public class MenuFindTest {
         assertEquals(mockMenuSelectionA.getName(), findAMenuSelection.getName());
         assertEquals(mockMenuSelectionA.getAmount(), findAMenuSelection.getAmount());
     }
-
 
     private Long givenStoreIdPresent() {
         MockStore mockStore = MockStore.testBuilder()
