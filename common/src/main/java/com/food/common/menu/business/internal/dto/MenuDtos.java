@@ -17,21 +17,6 @@ public class MenuDtos {
         this.menus.addAll(menus);
     }
 
-    public boolean containsAll(List<Long> menuIds) {
-        if (menuIds == null) return false;
-
-        for (Long menuId : menuIds) {
-            if (!contains(menuId)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private boolean contains(Long menuId) {
-        return menus.stream().anyMatch(menu -> menu.getId().equals(menuId));
-    }
 
     public boolean isEmpty() {
         return menus.isEmpty();

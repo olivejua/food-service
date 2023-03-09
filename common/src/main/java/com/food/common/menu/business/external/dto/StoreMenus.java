@@ -33,6 +33,22 @@ public class StoreMenus {
         }
     }
 
+    public boolean containsAll(List<Long> menuIds) {
+        if (menuIds == null) return false;
+
+        for (Long menuId : menuIds) {
+            if (!contains(menuId)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private boolean contains(Long menuId) {
+        return menus.stream().anyMatch(menu -> menu.getId().equals(menuId));
+    }
+
     @Getter
     public static class Menu {
         private Long id;
