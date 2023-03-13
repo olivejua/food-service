@@ -1,4 +1,4 @@
-package com.food.order.order;
+package com.food.order.order.temp;
 
 public interface OrderService {
 

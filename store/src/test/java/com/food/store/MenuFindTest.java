@@ -2,9 +2,7 @@ package com.food.store;
 
 import com.food.common.menu.business.external.MenuService;
 import com.food.common.menu.business.external.dto.StoreMenus;
-import com.food.common.menu.business.internal.dto.MenuDto;
-import com.food.common.menu.business.internal.dto.MenuOptionDto;
-import com.food.common.menu.business.internal.dto.MenuSelectionDto;
+import com.food.common.menu.business.internal.dto.*;
 import com.food.common.store.domain.type.OpenStatus;
 import com.food.common.utils.Amount;
 import com.food.common.utils.ByteUtils;
@@ -77,9 +75,9 @@ public class MenuFindTest {
 
         //then
         assertEquals(2, result.getMenus().size());
-        List<StoreMenus.Menu> menus = result.getMenus();
+        List<MenuDtoWithRelations> menus = result.getMenus();
 
-        StoreMenus.Menu findAMenu = menus.stream()
+        MenuDtoWithRelations findAMenu = menus.stream()
                 .filter(menu -> menu.getId().equals(mockMenuA.getId())).findFirst()
                 .orElseThrow(IllegalArgumentException::new);
         assertEquals(mockMenuA.getName(), findAMenu.getName());
@@ -88,15 +86,15 @@ public class MenuFindTest {
 
         assertEquals(1, findAMenu.getOptions().size());
 
-        StoreMenus.Option findAOption = findAMenu.getOptions().get(0);
+        MenuOptionDtoWithRelations findAOption = findAMenu.getOptions().get(0);
         assertEquals(mockMenuOptionA.getId(), findAOption.getId());
         assertEquals(mockMenuOptionA.getName(), findAOption.getName());
         assertEquals(mockMenuOptionA.getMinSize(), findAOption.getMinSize());
         assertEquals(mockMenuOptionA.getMaxSize(), findAOption.getMaxSize());
 
-        List<StoreMenus.Selection> findSelections = findAOption.getSelections();
+        List<MenuSelectionDto> findSelections = findAOption.getSelections();
         assertEquals(2, findSelections.size());
-        StoreMenus.Selection findAMenuSelection = findSelections.stream()
+        MenuSelectionDto findAMenuSelection = findSelections.stream()
                 .filter(selection -> selection.getId().equals(mockMenuSelectionA.getId())).findFirst()
                 .orElseThrow(IllegalArgumentException::new);
 
