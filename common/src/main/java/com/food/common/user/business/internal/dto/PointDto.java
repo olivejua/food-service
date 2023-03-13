@@ -55,7 +55,7 @@ public class PointDto {
     public PointDto use(@NotNull UsedPoints usedAmount) {
         PointDto point = new PointDto();
         point.userId = userId;
-        point.type = PointType.COLLECT;
+        point.type = PointType.USE;
         point.changedAmount = usedAmount;
         point.currentAmount = this.currentAmount.subtract(usedAmount);
         point.paymentId = paymentId;
