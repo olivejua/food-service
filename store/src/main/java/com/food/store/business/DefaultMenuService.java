@@ -1,7 +1,7 @@
 package com.food.store.business;
 
 import com.food.common.menu.business.external.MenuService;
-import com.food.common.menu.business.external.dto.StoreMenus;
+import com.food.store.business.dto.StoreMenusImpl;
 import com.food.common.menu.business.internal.MenuCommonService;
 import com.food.common.menu.business.internal.MenuOptionCommonService;
 import com.food.common.menu.business.internal.MenuSelectionCommonService;
@@ -24,7 +24,7 @@ public class DefaultMenuService implements MenuService {
     private final MenuSelectionCommonService menuSelectionCommonService;
 
     @Override
-    public StoreMenus findAllMenusByStoreId(Long storeId) {
+    public StoreMenusImpl findAllMenusByStoreId(Long storeId) {
         validateIfStoreExists(storeId);
 
         MenuDtos menus = menuCommonService.findAllByStoreId(storeId);
@@ -35,7 +35,7 @@ public class DefaultMenuService implements MenuService {
         Map<Long, List<MenuOptionDto>> menuOptions = menuOptionCommonService.findAllByMenuIds(menus.mapToMenuIds());
         Map<Long, List<MenuSelectionDto>> menuSelections = menuSelectionCommonService.findAllByMenuOptionIds(menuOptions.keySet());
 
-        return new StoreMenus(storeId, menus.get(), menuOptions, menuSelections);
+        return new StoreMenusImpl(storeId, menus.get(), menuOptions, menuSelections);
     }
 
     private void validateIfStoreExists(Long storeId) {
