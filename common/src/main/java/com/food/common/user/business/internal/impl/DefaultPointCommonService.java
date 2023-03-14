@@ -6,6 +6,7 @@ import com.food.common.user.business.internal.PointCommonService;
 import com.food.common.user.business.internal.dto.PointDto;
 import com.food.common.user.domain.Point;
 import com.food.common.user.domain.User;
+import com.food.common.user.enumeration.PointType;
 import com.food.common.user.repository.PointRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,9 +25,10 @@ public class DefaultPointCommonService implements PointCommonService {
     @Override
     public PointDto save(PointDto request) {
         User user = userEntityService.findById(request.getUserId());
-        Payment payment = paymentEntityService.findById(request.getPaymentId());
+        Point entity = request.getType() == PointType.COLLECT ?
+                Point.create(user, request.getType(), request.getChangedAmount(), request.getCurrentAmount(), paymentEntityService.findById(request.getPaymentId())) :
+                Point.create(user, request.getType(), request.getChangedAmount(), request.getCurrentAmount());
 
-        Point entity = Point.create(user, request.getType(), request.getChangedAmount(), request.getCurrentAmount(), payment);
         return new PointDto(pointRepository.save(entity));
     }
 
