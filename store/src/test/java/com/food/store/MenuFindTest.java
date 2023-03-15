@@ -1,6 +1,7 @@
 package com.food.store;
 
 import com.food.common.menu.business.external.MenuService;
+import com.food.common.menu.business.external.dto.StoreMenuItem;
 import com.food.common.menu.business.external.dto.StoreMenus;
 import com.food.common.menu.business.internal.dto.*;
 import com.food.common.store.domain.type.OpenStatus;
@@ -75,12 +76,11 @@ public class MenuFindTest {
 
         //then
         assertEquals(2, result.getMenus().size());
-        List<MenuDtoWithRelations> menus = result.getMenus();
+        List<StoreMenuItem> menus = result.getMenus();
 
-        MenuDtoWithRelations findAMenu = menus.stream()
+        StoreMenuItem findAMenu = menus.stream()
                 .filter(menu -> menu.getId().equals(mockMenuA.getId())).findFirst()
                 .orElseThrow(IllegalArgumentException::new);
-        assertEquals(mockMenuA.getName(), findAMenu.getName());
         assertEquals(mockMenuA.getAmount(), findAMenu.getAmount());
         assertEquals(mockMenuA.getCookingMinutes(), findAMenu.getCookingMinutes());
 

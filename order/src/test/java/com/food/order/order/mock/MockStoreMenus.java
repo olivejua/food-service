@@ -1,5 +1,6 @@
 package com.food.order.order.mock;
 
+import com.food.common.menu.business.external.dto.StoreMenuItem;
 import com.food.common.menu.business.external.dto.StoreMenus;
 import com.food.common.menu.business.internal.dto.MenuDtoWithRelations;
 
@@ -8,7 +9,7 @@ import java.util.List;
 
 public class MockStoreMenus implements StoreMenus {
     private Long storeId;
-    private List<MenuDtoWithRelations> menus = new ArrayList<>();
+    private List<StoreMenuItem> menus = new ArrayList<>();
 
     public static MockStoreMenus create(Long storeId, List<MenuDtoWithRelations> menus) {
         MockStoreMenus newInstance = new MockStoreMenus();
@@ -24,7 +25,7 @@ public class MockStoreMenus implements StoreMenus {
     }
 
     @Override
-    public List<MenuDtoWithRelations> getMenus() {
+    public List<StoreMenuItem> getMenus() {
         return menus;
     }
 
