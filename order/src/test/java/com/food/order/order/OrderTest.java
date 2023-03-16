@@ -2,13 +2,11 @@ package com.food.order.order;
 
 import com.food.common.error.CommonErrors;
 import com.food.common.error.exception.InvalidRequestParameterException;
-import com.food.common.menu.business.internal.dto.MenuDtoWithRelations;
-import com.food.common.menu.business.internal.dto.MenuOptionDtoWithRelations;
+import com.food.common.menu.business.external.dto.StoreMenuItem;
+import com.food.common.menu.business.internal.dto.MenuSelectionDto;
 import com.food.common.store.domain.type.OpenStatus;
 import com.food.common.utils.Amount;
-import com.food.order.order.temp.NotEnoughOrderAmountException;
 import com.food.order.common.stub.StubOrderService;
-import com.food.order.order.mock.MockStoreMenus;
 import com.food.order.order.mock.*;
 import com.food.order.order.stubrepository.StubMenuService;
 import com.food.order.order.stubrepository.StubStoreCommonService;
@@ -100,11 +98,11 @@ public class OrderTest {
 
         MockMenuOption mockOptionA = mockOption(mockMenuA.getId(), "Option A", 1, 1);
 
-        MockMenuSelection mockSelectionA = mockSelection(mockOptionA.getId(), "Selection A", 2_000);
-        MockMenuSelection mockSelectionB = mockSelection(mockOptionA.getId(), "Selection B", 1_000);
+        MenuSelectionDto mockSelectionA = mockSelection(mockOptionA.getId(), "Selection A", 2_000);
+        MenuSelectionDto mockSelectionB = mockSelection(mockOptionA.getId(), "Selection B", 1_000);
 
-        MenuDtoWithRelations menuA = new MenuDtoWithRelations(mockMenuA, List.of(new MenuOptionDtoWithRelations(mockOptionA, List.of(mockSelectionA, mockSelectionB))));
-        MenuDtoWithRelations menuB = new MenuDtoWithRelations(mockMenuB, Collections.emptyList());
+        StoreMenuItem menuA = MockStoreMenuItem.mock(mockMenuA, List.of(MockStoreMenuOptionItem.mock(mockOptionA, List.of(mockSelectionA, mockSelectionB))));
+        StoreMenuItem menuB = MockStoreMenuItem.mock(mockMenuB, Collections.emptyList());
 
         stubMenuService.remember(MockStoreMenus.create(mockStoreId1, List.of(menuA, menuB)));
 
@@ -130,8 +128,8 @@ public class OrderTest {
         MockMenuSelection mockSelectionA = mockSelection(mockOptionA.getId(), "Selection A", 2_000);
         MockMenuSelection mockSelectionB = mockSelection(mockOptionA.getId(), "Selection B", 1_000);
 
-        MenuDtoWithRelations menuA = new MenuDtoWithRelations(mockMenuA, List.of(new MenuOptionDtoWithRelations(mockOptionA, List.of(mockSelectionA, mockSelectionB))));
-        MenuDtoWithRelations menuB = new MenuDtoWithRelations(mockMenuB, Collections.emptyList());
+        StoreMenuItem menuA = MockStoreMenuItem.mock(mockMenuA, List.of(MockStoreMenuOptionItem.mock(mockOptionA, List.of(mockSelectionA, mockSelectionB))));
+        StoreMenuItem menuB = MockStoreMenuItem.mock(mockMenuB, Collections.emptyList());
 
         stubMenuService.remember(MockStoreMenus.create(mockStoreId1, List.of(menuA, menuB)));
 

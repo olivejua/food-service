@@ -1,5 +1,7 @@
 package com.food.store.business.dto;
 
+import com.food.common.menu.business.external.dto.StoreMenuItem;
+import com.food.common.menu.business.external.dto.StoreMenuOptionItem;
 import com.food.common.menu.business.external.dto.StoreMenus;
 import com.food.common.menu.business.internal.dto.*;
 import lombok.Getter;
@@ -15,7 +17,7 @@ import java.util.stream.Collectors;
 @Getter
 public class StoreMenusImpl implements StoreMenus {
     private final Long storeId;
-    private final List<MenuDtoWithRelations> menus = new ArrayList<>();
+    private final List<StoreMenuItem> menus = new ArrayList<>();
 
     public StoreMenusImpl(Long storeId, List<MenuDto> menus, Map<Long, List<MenuOptionDto>> options, Map<Long, List<MenuSelectionDto>> selections) {
         Assert.notNull(storeId, "storeId must not be null.");
@@ -28,18 +30,18 @@ public class StoreMenusImpl implements StoreMenus {
 
     private void addAll(List<MenuDto> menus, Map<Long, List<MenuOptionDto>> options, Map<Long, List<MenuSelectionDto>> selections) {
         for (MenuDto menu : menus) {
-            List<MenuOptionDtoWithRelations> mappedOptions = mapToMenuOptionDtoWithRelations(options.get(menu.getId()), selections);
-            this.menus.add(new MenuDtoWithRelations(menu, mappedOptions));
+            List<StoreMenuOptionItem> mappedOptions = mapToMenuOptionDtoWithRelations(options.get(menu.getId()), selections);
+            this.menus.add(new StoreMenuItemImpl(menu, mappedOptions));
         }
     }
 
-    private List<MenuOptionDtoWithRelations> mapToMenuOptionDtoWithRelations(List<MenuOptionDto> options, Map<Long, List<MenuSelectionDto>> selections) {
+    private List<StoreMenuOptionItem> mapToMenuOptionDtoWithRelations(List<MenuOptionDto> options, Map<Long, List<MenuSelectionDto>> selections) {
         if (CollectionUtils.isEmpty(options)) {
             return Collections.emptyList();
         }
 
         return options.stream()
-                .map(option -> new MenuOptionDtoWithRelations(option, selections.get(option.getId())))
+                .map(option -> new StoreMenuOptionItemImpl(option, selections.get(option.getId())))
                 .collect(Collectors.toList());
     }
 
