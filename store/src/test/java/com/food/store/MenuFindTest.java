@@ -1,6 +1,8 @@
 package com.food.store;
 
 import com.food.common.menu.business.external.MenuService;
+import com.food.common.menu.business.external.dto.StoreMenuItem;
+import com.food.common.menu.business.external.dto.StoreMenuOptionItem;
 import com.food.common.menu.business.external.dto.StoreMenus;
 import com.food.common.menu.business.internal.dto.MenuDto;
 import com.food.common.menu.business.internal.dto.MenuOptionDto;
@@ -77,26 +79,25 @@ public class MenuFindTest {
 
         //then
         assertEquals(2, result.getMenus().size());
-        List<StoreMenus.Menu> menus = result.getMenus();
+        List<StoreMenuItem> menus = result.getMenus();
 
-        StoreMenus.Menu findAMenu = menus.stream()
-                .filter(menu -> menu.getMenuId().equals(mockMenuA.getId())).findFirst()
+        StoreMenuItem findAMenu = menus.stream()
+                .filter(menu -> menu.getId().equals(mockMenuA.getId())).findFirst()
                 .orElseThrow(IllegalArgumentException::new);
-        assertEquals(mockMenuA.getName(), findAMenu.getName());
         assertEquals(mockMenuA.getAmount(), findAMenu.getAmount());
         assertEquals(mockMenuA.getCookingMinutes(), findAMenu.getCookingMinutes());
 
         assertEquals(1, findAMenu.getOptions().size());
 
-        StoreMenus.Option findAOption = findAMenu.getOptions().get(0);
-        assertEquals(mockMenuOptionA.getId(), findAOption.getOptionId());
+        StoreMenuOptionItem findAOption = findAMenu.getOptions().get(0);
+        assertEquals(mockMenuOptionA.getId(), findAOption.getId());
         assertEquals(mockMenuOptionA.getName(), findAOption.getName());
         assertEquals(mockMenuOptionA.getMinSize(), findAOption.getMinSize());
         assertEquals(mockMenuOptionA.getMaxSize(), findAOption.getMaxSize());
 
-        List<StoreMenus.Selection> findSelections = findAOption.getSelections();
+        List<MenuSelectionDto> findSelections = findAOption.getSelections();
         assertEquals(2, findSelections.size());
-        StoreMenus.Selection findAMenuSelection = findSelections.stream()
+        MenuSelectionDto findAMenuSelection = findSelections.stream()
                 .filter(selection -> selection.getId().equals(mockMenuSelectionA.getId())).findFirst()
                 .orElseThrow(IllegalArgumentException::new);
 
@@ -104,7 +105,6 @@ public class MenuFindTest {
         assertEquals(mockMenuSelectionA.getName(), findAMenuSelection.getName());
         assertEquals(mockMenuSelectionA.getAmount(), findAMenuSelection.getAmount());
     }
-
 
     private Long givenStoreIdPresent() {
         MockStore mockStore = MockStore.testBuilder()

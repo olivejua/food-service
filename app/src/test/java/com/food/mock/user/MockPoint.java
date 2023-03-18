@@ -4,6 +4,7 @@ import com.food.common.payment.domain.Payment;
 import com.food.common.user.domain.Point;
 import com.food.common.user.domain.User;
 import com.food.common.user.enumeration.PointType;
+import com.food.common.utils.Amount;
 import lombok.NoArgsConstructor;
 
 import static lombok.AccessLevel.PRIVATE;
@@ -53,8 +54,7 @@ public class MockPoint {
         }
 
         public Point build() {
-//            return Point.create(user, type, changedAmount, currentAmount, payment);
-            return null;
+            return Point.create(user, type, Amount.won(changedAmount), Amount.won(currentAmount), payment);
         }
     }
 }

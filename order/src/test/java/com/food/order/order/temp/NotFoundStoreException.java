@@ -1,11 +1,14 @@
-package com.food.store.error;
+package com.food.order.order.temp;
 
 import com.food.common.error.ApplicationErrors;
+import com.food.order.error.OrderErrors;
 
 public class NotFoundStoreException extends RuntimeException {
-    private static final ApplicationErrors ERROR = MenuErrors.NOT_FOUND_STORE_TO_FIND_MENUS;
+    private static final ApplicationErrors ERROR = OrderErrors.NOT_FOUND_STORE_TO_ORDER;
 
     public NotFoundStoreException(Long storeId) {
         super(ERROR.appendMessage("storeId=" + storeId));
     }
+
+
 }

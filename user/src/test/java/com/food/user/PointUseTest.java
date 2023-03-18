@@ -3,6 +3,7 @@ package com.food.user;
 import com.food.common.user.business.external.PointService;
 import com.food.common.user.business.internal.dto.PointDto;
 import com.food.common.user.business.internal.dto.UserDto;
+import com.food.common.user.enumeration.PointType;
 import com.food.common.utils.Amount;
 import com.food.common.utils.UsedPoints;
 import com.food.user.business.DefaultPointService;
@@ -88,6 +89,7 @@ public class PointUseTest {
         Optional<PointDto> findPointOptional = stubPointService.findByPointId(usedPointId);
         assertTrue(findPointOptional.isPresent());
         PointDto findPoint = findPointOptional.get();
+        assertEquals(PointType.USE, findPoint.getType());
         assertEquals(expectedCurrentAmount, findPoint.getCurrentAmount());
         assertEquals(usedPoints, findPoint.getChangedAmount());
     }

@@ -54,62 +54,18 @@ public class Point extends BaseTimeEntity {
     @JoinColumn(name = "payment_id")
     private Payment payment;
 
-    public static Point create(User user, PointType type, Amount changedAmount, Amount currentAmount, Payment payment) {
+    public static Point create(User user, PointType type, Amount changedAmount, Amount currentAmount) {
         Point point = new Point();
         point.user = user;
         point.type = type;
         point.changedAmount = changedAmount.getValue();
         point.currentAmount = currentAmount.getValue();
-        point.payment = payment;
 
         return point;
     }
 
-    public static Point createFirstPoint(User user) {
-        Point point = new Point();
-        point.user = user;
-        point.currentAmount = 0;
-
-        return point;
-    }
-
-    public Point use(Integer amount) {
-        Point point = new Point();
-        point.user = user;
-        point.type = PointType.USE;
-        point.changedAmount = amount;
-        point.currentAmount = this.currentAmount - amount;
-
-        return point;
-    }
-
-    public Point recollect(Integer amount) {
-        Point point = new Point();
-        point.user = user;
-        point.type = PointType.RECOLLECT;
-        point.changedAmount = amount;
-        point.currentAmount = this.currentAmount + amount;
-
-        return point;
-    }
-
-    public Point collect(Integer amount, Payment payment) {
-        Point point = new Point();
-        point.user = user;
-        point.type = PointType.COLLECT;
-        point.changedAmount = amount;
-        point.currentAmount = this.currentAmount + amount;
-        point.payment = payment;
-
-        return point;
-    }
-
-    public Point retrieve(Integer amount, Payment payment) {
-        Point point = new Point();
-        point.user = user;
-        point.type = PointType.RETRIEVE;
-        point.changedAmount = amount;
-        point.currentAmount = this.currentAmount - amount;
+    public static Point create(User user, PointType type, Amount changedAmount, Amount currentAmount, Payment payment) {
+        Point point = create(user, type, changedAmount, currentAmount);
         point.payment = payment;
 
         return point;

@@ -1,7 +1,7 @@
-package com.food.order.order;
+package com.food.order.order.temp;
 
-import com.food.common.menu.business.internal.MenuCommonService;
-import com.food.common.menu.business.internal.dto.MenuDtos;
+import com.food.common.menu.business.external.MenuService;
+import com.food.common.menu.business.external.dto.StoreMenus;
 import com.food.common.order.business.internal.OrderCommonService;
 import com.food.common.store.business.internal.StoreCommonService;
 import com.food.common.store.business.internal.dto.StoreDto;
@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 public class DefaultOrderService implements OrderService {
     private final OrderCommonService orderCommonService;
     private final StoreCommonService storeCommonService;
-    private final MenuCommonService menuCommonService;
+    private final MenuService menuService;
 
     @Override
     public Long order(OrderDoRequest request) {
@@ -24,11 +24,17 @@ public class DefaultOrderService implements OrderService {
             throw new InvalidStoreOpenStatusException();
         }
 
-        MenuDtos menus = menuCommonService.findAllByStoreId(request.getStoreId());
+        StoreMenus menus = menuService.findAllMenusByStoreId(request.getStoreId());
         if (!menus.containsAll(request.getMenuIds())) {
             throw new NotFoundMenuException();
         }
 
-        return null;
+        /**
+         * 주문금액을 계산한다.
+         * 메뉴Id(has OptionId, SelectionId)의 가격
+         * 수량
+         */
+
+        throw new NotEnoughOrderAmountException(null);
     }
 }

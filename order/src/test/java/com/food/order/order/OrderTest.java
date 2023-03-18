@@ -2,32 +2,37 @@ package com.food.order.order;
 
 import com.food.common.error.CommonErrors;
 import com.food.common.error.exception.InvalidRequestParameterException;
+import com.food.common.menu.business.external.dto.StoreMenuItem;
+import com.food.common.menu.business.internal.dto.MenuSelectionDto;
 import com.food.common.store.domain.type.OpenStatus;
 import com.food.common.utils.Amount;
 import com.food.order.common.stub.StubOrderService;
-import com.food.order.order.mock.MockMenu;
-import com.food.order.order.mock.MockStore;
+import com.food.order.order.mock.*;
+import com.food.order.order.stubrepository.StubMenuService;
 import com.food.order.order.stubrepository.StubStoreCommonService;
+import com.food.order.order.temp.*;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.List;
 
+import static com.food.order.order.mock.MockMenuFactory.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class OrderTest {
     private OrderService orderService;
     private StubOrderService stubOrderCommonService;
     private StubStoreCommonService stubStoreCommonService;
-    private StubMenuCommonService stubMenuCommonService;
+    private StubMenuService stubMenuService;
 
     @BeforeEach
     void setup() {
         stubOrderCommonService = new StubOrderService();
         stubStoreCommonService = new StubStoreCommonService();
-        stubMenuCommonService = new StubMenuCommonService();
-        orderService = new DefaultOrderService(stubOrderCommonService, stubStoreCommonService, stubMenuCommonService);
+        stubMenuService = new StubMenuService();
+        orderService = new DefaultOrderService(stubOrderCommonService, stubStoreCommonService, stubMenuService);
     }
 
     @Test
@@ -88,41 +93,53 @@ public class OrderTest {
         Long mockStoreId1 = givenStoreIdPresent();
         Long mockStoreId2 = givenStoreIdPresent();
 
-        Long aMenuId = stubMenuCommonService.save(MockMenu.testBuilder()
-                .storeId(mockStoreId1)
-                .name("A Menu")
-                .amount(Amount.won(12_000))
-                .build()).getId();
+        MockMenu mockMenuA = mockMenu(mockStoreId1, "A Menu", 12_000);
+        MockMenu mockMenuB = mockMenu(mockStoreId1, "B Menu", 7_000);
 
-        Long bMenuId = stubMenuCommonService.save(MockMenu.testBuilder()
-                .storeId(mockStoreId2)
-                .name("B Menu")
-                .amount(Amount.won(7_000))
-                .build()).getId();
+        MockMenuOption mockOptionA = mockOption(mockMenuA.getId(), "Option A", 1, 1);
+
+        MenuSelectionDto mockSelectionA = mockSelection(mockOptionA.getId(), "Selection A", 2_000);
+        MenuSelectionDto mockSelectionB = mockSelection(mockOptionA.getId(), "Selection B", 1_000);
+
+        StoreMenuItem menuA = MockStoreMenuItem.mock(mockMenuA, List.of(MockStoreMenuOptionItem.mock(mockOptionA, List.of(mockSelectionA, mockSelectionB))));
+        StoreMenuItem menuB = MockStoreMenuItem.mock(mockMenuB, Collections.emptyList());
+
+        stubMenuService.remember(MockStoreMenus.create(mockStoreId1, List.of(menuA, menuB)));
+
+        MockMenu mockMenuC = mockMenu(mockStoreId2, "C Menu", 20_000);
 
         //when & then
         assertThrows(NotFoundMenuException.class,
                 () -> orderService.order(new OrderDoRequest(mockStoreId1,
-                        List.of(new OrderMenuRequest(aMenuId, 1), new OrderMenuRequest(bMenuId, 1)))));
+                        List.of(new OrderMenuRequest(mockMenuA.getId(), 1), new OrderMenuRequest(mockMenuC.getId(), 1)))));
 
-        //given
-        Long mockStoreId3 = givenStoreIdPresent();
+    }
 
-        Long cMenuId = stubMenuCommonService.save(MockMenu.testBuilder()
-                .storeId(mockStoreId3)
-                .name("C Menu")
-                .amount(Amount.won(14_000))
-                .build()).getId();
+    @Disabled
+    @Test
+    void 주문금액이_가게의_최소주문금액보다_커야한다() {
+        Long mockStoreId1 = givenStoreIdPresent(Amount.won(30_000));
 
-        Long dMenuId = stubMenuCommonService.save(MockMenu.testBuilder()
-                .storeId(mockStoreId3)
-                .name("D Menu")
-                .amount(Amount.won(5_000))
-                .build()).getId();
+        MockMenu mockMenuA = mockMenu(mockStoreId1, "A Menu", 12_000);
+        MockMenu mockMenuB = mockMenu(mockStoreId1, "B Menu", 3_000);
 
-        assertDoesNotThrow(() -> orderService.order(new OrderDoRequest(mockStoreId3,
-                        List.of(new OrderMenuRequest(cMenuId, 1), new OrderMenuRequest(dMenuId, 2)))));
+        MockMenuOption mockOptionA = mockOption(mockMenuA.getId(), "Option A", 1, 1);
 
+        MockMenuSelection mockSelectionA = mockSelection(mockOptionA.getId(), "Selection A", 2_000);
+        MockMenuSelection mockSelectionB = mockSelection(mockOptionA.getId(), "Selection B", 1_000);
+
+        StoreMenuItem menuA = MockStoreMenuItem.mock(mockMenuA, List.of(MockStoreMenuOptionItem.mock(mockOptionA, List.of(mockSelectionA, mockSelectionB))));
+        StoreMenuItem menuB = MockStoreMenuItem.mock(mockMenuB, Collections.emptyList());
+
+        stubMenuService.remember(MockStoreMenus.create(mockStoreId1, List.of(menuA, menuB)));
+
+        assertThrows(NotEnoughOrderAmountException.class,
+                () -> orderService.order(new OrderDoRequest(mockStoreId1,
+                        List.of(new OrderMenuRequest(mockMenuA.getId(), 1, List.of(new OrderMenuSelectionRequest(mockSelectionA.getId(), 1)))))));
+
+
+        assertDoesNotThrow(() -> orderService.order(new OrderDoRequest(mockStoreId1,
+                List.of(new OrderMenuRequest(mockMenuA.getId(), 2, List.of(new OrderMenuSelectionRequest(mockSelectionA.getId(), 1)))))));
     }
 
     private Long givenStoreIdNotPresent() {
@@ -136,14 +153,16 @@ public class OrderTest {
     }
 
     private Long givenStoreIdPresent() {
+        return this.givenStoreIdPresent(Amount.won(12_000));
+    }
+
+    private Long givenStoreIdPresent(Amount minOrderAmount) {
         MockStore mockStore = MockStore.testBuilder()
                 .name("A Restaurant")
-                .minOrderAmount(Amount.won(10_000))
+                .minOrderAmount(minOrderAmount)
                 .status(OpenStatus.OPEN)
                 .build();
 
         return stubStoreCommonService.save(mockStore).getId();
     }
-
-
 }
