@@ -6,9 +6,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public abstract class CollectionUtils {
-    public static <T, R> List<R> mappedBy(Collection<T> targetCollection, Function<? super T, ? extends R> extractAction) {
-        return targetCollection.stream()
-                .map(extractAction)
+    public static <T, R> List<R> mappedBy(Collection<T> target, Function<T, R> mapper) {
+        return target.stream()
+                .map(mapper)
                 .collect(Collectors.toList());
     }
 }
